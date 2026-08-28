@@ -18,6 +18,7 @@ const PUB_FILE = path.join(__dirname, '..', 'data', 'publications.json');
 const DS_FILE = path.join(__dirname, '..', 'data', 'datasets.json');
 const PILLAR_FILE = path.join(DOCS_DIR, 'stats-data.json');
 const FACILITY_FILE = path.join(__dirname, '..', 'data', 'facility-names.json');
+const GITHUB_SOFTWARE_FILE = path.join(__dirname, '..', 'data', 'github-software.json');
 
 // Some source records store titles with HTML entities ("&amp;#8217;") or
 // markup tags (<sup>40</sup>Ar). Decode + strip to plain text at export
@@ -89,9 +90,13 @@ function run() {
   // Curated AuScope-supported software and the publications that use it.
   const facilityData = fs.existsSync(FACILITY_FILE)
     ? JSON.parse(fs.readFileSync(FACILITY_FILE, 'utf8')) : {};
+  const githubData = fs.existsSync(GITHUB_SOFTWARE_FILE)
+    ? JSON.parse(fs.readFileSync(GITHUB_SOFTWARE_FILE, 'utf8')) : { metadata: {}, records: [] };
   fs.writeFileSync(path.join(DOCS_DIR, 'software-data.json'), JSON.stringify({
     generated: new Date().toISOString(),
-    records: buildSoftwareRegistry(pubs, facilityData)
+    records: buildSoftwareRegistry(pubs, facilityData),
+    github: githubData.records || [],
+    githubMetadata: githubData.metadata || {}
   }, null, 2));
 
   // ── Keep this fork's public root dataset-only ──

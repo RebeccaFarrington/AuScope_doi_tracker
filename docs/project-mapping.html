@@ -18,20 +18,7 @@
         table.data th[aria-sort="ascending"] .arrow::after { content:'▲'; }
         table.data th[aria-sort="descending"] .arrow::after { content:'▼'; }
         .project-id { font-family:var(--mono); color:var(--accent-strong); font-weight:600; white-space:nowrap; }
-        .mapping-tree { display:flex; flex-direction:column; gap:10px; }
-        .tree-lens, .tree-program { border:1px solid var(--border); border-radius:8px; background:var(--bg-soft); overflow:hidden; }
-        .tree-program { margin:8px 12px 12px; background:var(--bg); }
-        .tree-lens > summary, .tree-program > summary { cursor:pointer; list-style:none; display:flex; align-items:center; gap:9px; padding:12px 14px; font-weight:600; }
-        .tree-program > summary { padding:10px 12px; color:var(--accent-strong); }
-        .tree-lens > summary::-webkit-details-marker, .tree-program > summary::-webkit-details-marker { display:none; }
-        .tree-lens > summary::before, .tree-program > summary::before { content:'›'; color:var(--accent); font-size:20px; line-height:1; transition:transform .12s; }
-        .tree-lens[open] > summary::before, .tree-program[open] > summary::before { transform:rotate(90deg); }
-        .tree-count { margin-left:auto; background:var(--accent-soft); color:var(--accent-strong); border-radius:12px; padding:2px 8px; font-size:11px; }
-        .project-list { list-style:none; margin:0; padding:0 12px 12px 38px; }
-        .project-item { border-top:1px solid var(--border); padding:11px 8px; }
-        .project-title { font-weight:600; color:var(--text); }
-        .project-meta { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:5px; color:var(--text-soft); font-size:12px; }
-        .project-meta span { white-space:nowrap; }
+        .project-title { font-weight:600; color:var(--text); min-width:190px; }
         .order-badge { display:inline-block; min-width:28px; text-align:center; background:var(--bg-muted); color:var(--text-soft); border-radius:10px; padding:1px 7px; font:11px var(--mono); margin-right:7px; }
         .source-note { color:var(--text-soft); font-size:12px; margin:-4px 0 18px; }
         .source-note a { color:var(--accent); }
@@ -75,7 +62,23 @@
         <span class="meta" id="result-count">Loading&hellip;</span>
     </div>
 
-    <div class="mapping-tree" id="mapping-tree"><div class="empty-state"><span class="spinner"></span> Loading project mappings&hellip;</div></div>
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr>
+                <th class="sortable" data-sort="sourceOrder">Original order <span class="arrow"></span></th>
+                <th class="sortable" data-sort="lens">Lens <span class="arrow"></span></th>
+                <th class="sortable" data-sort="program">Program <span class="arrow"></span></th>
+                <th class="sortable" data-sort="project">Project <span class="arrow"></span></th>
+                <th class="sortable" data-sort="fundingName">Funding name <span class="arrow"></span></th>
+                <th class="sortable" data-sort="secondaryId">Project ID <span class="arrow"></span></th>
+                <th class="sortable" data-sort="type">Type <span class="arrow"></span></th>
+                <th class="sortable" data-sort="host">Host <span class="arrow"></span></th>
+                <th class="sortable" data-sort="leader">Leader <span class="arrow"></span></th>
+                <th class="sortable" data-sort="ncris">NCRIS <span class="arrow"></span></th>
+            </tr></thead>
+            <tbody id="mapping-body"><tr><td colspan="10" class="empty-state"><span class="spinner"></span> Loading project mappings&hellip;</td></tr></tbody>
+        </table>
+    </div>
     <p class="foot">Project mapping reference used by the Dataset Registry.</p>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -83,8 +86,8 @@
 <script>
 (function() {
     'use strict';
-    var rows=[], visible=[];
-    var tree=document.getElementById('mapping-tree'), search=document.getElementById('search');
+    var rows=[], visible=[], sortState={key:'sourceOrder',dir:'asc'};
+    var body=document.getElementById('mapping-body'), search=document.getElementById('search');
     var lens=document.getElementById('lens'), program=document.getElementById('program');
 
     fetch('registry-enrichment.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(data){
@@ -94,7 +97,7 @@
         populate(program, unique(rows.map(function(r){return r.program;}).filter(Boolean)).sort());
         setStat('stat-total',rows.length); setStat('stat-ids',unique(rows.map(function(r){return r.secondaryId;}).filter(Boolean)).length);
         setStat('stat-lenses',lens.options.length-1); setStat('stat-programs',program.options.length-1); render();
-    }).catch(function(err){ tree.innerHTML='<div class="empty-state">Could not load project mappings: '+escapeHtml(err.message)+'</div>'; });
+    }).catch(function(err){ body.innerHTML='<tr><td colspan="10" class="empty-state">Could not load project mappings: '+escapeHtml(err.message)+'</td></tr>'; });
 
     function populate(el,values){ values.forEach(function(v){el.add(new Option(v,v));}); }
     function unique(a){return a.filter(function(v,i){return a.indexOf(v)===i;});}
@@ -103,28 +106,17 @@
         var q=search.value.trim().toLowerCase();
         visible=rows.filter(function(r){return (!q||r._search.indexOf(q)!==-1)&&(!lens.value||r.lens===lens.value)&&(!program.value||r.program===program.value);});
         document.getElementById('result-count').textContent=visible.length.toLocaleString('en-AU')+' of '+rows.length.toLocaleString('en-AU')+' mappings';
-        if(!visible.length){tree.innerHTML='<div class="empty-state">No project mappings match the current filters.</div>';return;}
-        var grouped={};
-        visible.forEach(function(r){var l=r.lens||'Unassigned lens',p=r.program||'Unassigned program';if(!grouped[l])grouped[l]={};if(!grouped[l][p])grouped[l][p]=[];grouped[l][p].push(r);});
-        var autoOpen=!!(q||lens.value||program.value);
-        tree.innerHTML=Object.keys(grouped).map(function(lensName){
-            var programs=grouped[lensName],lensCount=Object.keys(programs).reduce(function(n,p){return n+programs[p].length;},0);
-            return '<details class="tree-lens"'+(autoOpen?' open':'')+'><summary>'+escapeHtml(lensName)+'<span class="tree-count">'+lensCount+' project'+(lensCount===1?'':'s')+'</span></summary>'
-                +Object.keys(programs).map(function(programName){var projects=programs[programName];return '<details class="tree-program"'+(autoOpen?' open':'')+'><summary>'+escapeHtml(programName)+'<span class="tree-count">'+projects.length+'</span></summary><ol class="project-list">'+projects.map(renderProject).join('')+'</ol></details>';}).join('')+'</details>';
-        }).join('');
+        visible.sort(compare);updateHeaders();
+        body.innerHTML=visible.length?visible.map(renderRow).join(''):'<tr><td colspan="10" class="empty-state">No project mappings match the current filters.</td></tr>';
     }
-    function renderProject(r){
-        var title=r.project||r.fundingName||'Unnamed project';
-        return '<li class="project-item"><div class="project-title"><span class="order-badge" title="Original sheet order">'+r.sourceOrder+'</span>'+escapeHtml(title)+'</div><div class="project-meta">'
-            +(r.secondaryId?'<span><strong>Project ID:</strong> <span class="project-id">'+escapeHtml(r.secondaryId)+'</span></span>':'')
-            +(r.fundingName&&r.fundingName!==title?'<span><strong>Funding name:</strong> '+escapeHtml(r.fundingName)+'</span>':'')
-            +(r.type?'<span><strong>Type:</strong> '+escapeHtml(r.type)+'</span>':'')
-            +(r.host?'<span><strong>Host:</strong> '+escapeHtml(r.host)+'</span>':'')
-            +(r.leader?'<span><strong>Leader:</strong> '+escapeHtml(r.leader)+'</span>':'')
-            +(r.ncris?'<span><strong>NCRIS:</strong> '+escapeHtml(r.ncris)+'</span>':'')+'</div></li>';
-    }
+    function renderRow(r){return '<tr><td><span class="order-badge">'+r.sourceOrder+'</span></td><td>'+value(r.lens)+'</td><td>'+value(r.program)+'</td><td class="project-title">'+value(r.project||r.fundingName)+'</td><td>'+value(r.fundingName)+'</td><td class="project-id">'+value(r.secondaryId)+'</td><td>'+value(r.type)+'</td><td>'+value(r.host)+'</td><td>'+value(r.leader)+'</td><td>'+value(r.ncris)+'</td></tr>';}
+    function value(v){return v?escapeHtml(v):'&mdash;';}
+    function compare(a,b){var av=a[sortState.key],bv=b[sortState.key];if(av==null||av==='')return bv==null||bv===''?0:1;if(bv==null||bv==='')return-1;var n=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv),undefined,{numeric:true,sensitivity:'base'});return sortState.dir==='desc'?-n:n;}
+    function updateHeaders(){document.querySelectorAll('th.sortable').forEach(function(th){var active=th.dataset.sort===sortState.key;th.classList.toggle('sorted',active);th.setAttribute('aria-sort',active?(sortState.dir==='asc'?'ascending':'descending'):'none');});}
+    document.querySelector('thead').addEventListener('click',function(e){var th=e.target.closest('th.sortable');if(!th)return;var key=th.dataset.sort;sortState.dir=sortState.key===key&&sortState.dir==='asc'?'desc':'asc';sortState.key=key;render();});
+    document.querySelectorAll('th.sortable').forEach(function(th){th.tabIndex=0;th.setAttribute('role','button');th.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();th.click();}});});
     search.addEventListener('input',debounce(render,120));lens.addEventListener('change',render);program.addEventListener('change',render);
-    document.getElementById('reset').addEventListener('click',function(){search.value='';lens.value='';program.value='';render();search.focus();});
+    document.getElementById('reset').addEventListener('click',function(){search.value='';lens.value='';program.value='';sortState={key:'sourceOrder',dir:'asc'};render();search.focus();});
     document.getElementById('export').addEventListener('click',function(){exportCsv({rows:visible,filenamePrefix:'auscope-project-mapping',columns:[
         {header:'Original order',value:function(r){return r.sourceOrder;}},{header:'Lens',value:function(r){return r.lens;}},{header:'Program',value:function(r){return r.program;}},{header:'Project Funding Name',value:function(r){return r.fundingName;}},{header:'Project Public Name',value:function(r){return r.project;}},{header:'Project ID',value:function(r){return r.secondaryId;}},{header:'Type',value:function(r){return r.type;}},{header:'Host',value:function(r){return r.host;}},{header:'Leader',value:function(r){return r.leader;}},{header:'NCRIS',value:function(r){return r.ncris;}}
     ]});});

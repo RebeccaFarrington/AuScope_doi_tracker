@@ -137,6 +137,7 @@ the file.
 ```bash
 npm run stats        # cross-pillar numbers → docs/stats-data.json
 npm run dashboard    # regenerate hub + widget + feeds
+npm run github-software # refresh AuScope public repository snapshot
 npm run evidence     # re-grade the evidence ladder
 npm run consolidate  # fold duplicate works
 npm run nvcl         # full NVCL harvest (~50 min, 8 nodes)
