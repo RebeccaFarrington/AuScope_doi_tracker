@@ -38,6 +38,9 @@ change.
 | `nvcl.html` | National Virtual Core Library — **verifiable at source**: live check queries all 8 state government nodes from the visitor's browser; borehole map; HyLogger fleet. | `nvcl-data.json` (monthly harvest) + live WFS |
 | `ausis.html` | Seismometers in Schools — **fully live**, no snapshot. Station map, streaming status, network DOI citations. | AusPass FDSN + AuScope_Outreach data products |
 | `datasets.html` | Thin router to the platform trackers (100 lines, no JS). | — |
+| `dataset-registry.html` | Searchable cross-platform registry with filters, DOI links and CSV export. | `datasets-data.json` |
+| `project-mapping.html` | Searchable project-to-lens/program reference sourced from the shared Project Mapping sheet. | `registry-enrichment.json` |
+| `software-registry.html` | Curated AuScope-supported software with expandable publication-use evidence and CSV export. | `software-data.json` |
 | `widget.html` | Embeddable stats widget (AuScope purple, iframe). | Generated |
 
 **Shared front-end chassis** — `docs/tracker-shared.css`, `tracker-chassis.js`

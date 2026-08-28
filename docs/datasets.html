@@ -23,24 +23,29 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
-            color: #333333;
+            background: #fffafd;
+            color: #3b1730;
             padding: 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
-        h1 { color: #2563eb; margin-bottom: 8px; font-size: 22px; }
-        .subtitle { color: #6b7280; font-size: 13px; margin-bottom: 20px; }
-        .subtitle a { color: #2563eb; text-decoration: none; }
+        h1 { color: #e0218a; margin-bottom: 8px; font-size: 22px; }
+        .subtitle { color: #70435d; font-size: 13px; margin-bottom: 20px; }
+        .subtitle a { color: #e0218a; text-decoration: none; }
         .subtitle a:hover { text-decoration: underline; }
 
         .intro {
-            color: #4b5563;
+            color: #70435d;
             font-size: 13px;
             line-height: 1.7;
             margin-bottom: 20px;
             max-width: 800px;
         }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #f3c6dd; }
+        .tab { color: #70435d; padding: 8px 12px; text-decoration: none; border-bottom: 3px solid transparent; font-size: 13px; font-weight: 600; }
+        .tab.active { color: #e0218a; border-bottom-color: #e0218a; }
+        .tab:hover { color: #b5166d; }
 
         .platform-list {
             display: grid;
@@ -50,18 +55,19 @@
         }
         .platform-card {
             display: block;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #f3c6dd;
+            background: #fff0f7;
             border-radius: 8px;
             padding: 16px;
             text-decoration: none;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
         .platform-card:hover {
-            border-color: #2563eb;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+            border-color: #e0218a;
+            box-shadow: 0 2px 8px rgba(224, 33, 138, 0.15);
         }
-        .platform-card h3 { color: #1e40af; font-size: 15px; margin-bottom: 4px; }
-        .platform-card p { color: #6b7280; font-size: 12px; }
+        .platform-card h3 { color: #d91b80; font-size: 15px; margin-bottom: 4px; }
+        .platform-card p { color: #70435d; font-size: 12px; }
 
         @media (max-width: 700px) {
             .platform-list { grid-template-columns: 1fr; }
@@ -71,7 +77,14 @@
 <body>
 
     <h1>AuScope Datasets</h1>
-    <p class="subtitle">Browse datasets across AuScope research infrastructure platforms &middot; <a href="index.html">&larr; Impact overview</a></p>
+    <p class="subtitle">Browse datasets across AuScope research infrastructure platforms</p>
+
+    <nav class="tabs" aria-label="Dataset views">
+        <a class="tab active" href="datasets.html" aria-current="page">Platform trackers</a>
+        <a class="tab" href="dataset-registry.html">Dataset Registry</a>
+        <a class="tab" href="project-mapping.html">Project Mapping</a>
+        <a class="tab" href="software-registry.html">Software Registry</a>
+    </nav>
 
     <p class="intro">
         Each platform has a dedicated tracker with live metadata health checks and

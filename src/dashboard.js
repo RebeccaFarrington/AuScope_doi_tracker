@@ -3,7 +3,8 @@
  * AuScope DOI Tracker — Dashboard Generator
  *
  * Reads data/publications.json (and data/datasets.json when ready)
- * and generates a static HTML dashboard at docs/index.html.
+ * and generates the legacy impact dashboard at docs/impact-dashboard.html.
+ * The public docs/index.html stays a dataset-only redirect for this fork.
  * Designed to be served via GitHub Pages and embedded via iframe.
  *
  * Usage: node src/dashboard.js
@@ -16,6 +17,7 @@ const DOCS_DIR = path.join(__dirname, '..', 'docs');
 const PUB_FILE = path.join(__dirname, '..', 'data', 'publications.json');
 const DS_FILE = path.join(__dirname, '..', 'data', 'datasets.json');
 const PILLAR_FILE = path.join(DOCS_DIR, 'stats-data.json');
+const FACILITY_FILE = path.join(__dirname, '..', 'data', 'facility-names.json');
 
 // Some source records store titles with HTML entities ("&amp;#8217;") or
 // markup tags (<sup>40</sup>Ar). Decode + strip to plain text at export
@@ -78,24 +80,82 @@ function run() {
     records: slim
   }));
 
-  // ── Write docs/index.html ──
+  // Same-origin feed for the public cross-platform dataset registry.
+  fs.writeFileSync(path.join(DOCS_DIR, 'datasets-data.json'), JSON.stringify({
+    generated: dsData.metadata.last_updated || new Date().toISOString(),
+    records: datasets
+  }, null, 2));
+
+  // Curated AuScope-supported software and the publications that use it.
+  const facilityData = fs.existsSync(FACILITY_FILE)
+    ? JSON.parse(fs.readFileSync(FACILITY_FILE, 'utf8')) : {};
+  fs.writeFileSync(path.join(DOCS_DIR, 'software-data.json'), JSON.stringify({
+    generated: new Date().toISOString(),
+    records: buildSoftwareRegistry(pubs, facilityData)
+  }, null, 2));
+
+  // ── Keep this fork's public root dataset-only ──
   // Cross-pillar numbers come from src/stats.js (run it first in CI);
   // missing/stale file just hides the explorer card numbers.
   const pillarData = fs.existsSync(PILLAR_FILE)
     ? JSON.parse(fs.readFileSync(PILLAR_FILE, 'utf8'))
     : null;
   const html = buildHTML(stats, pubData.metadata.last_updated, pillarData);
-  fs.writeFileSync(path.join(DOCS_DIR, 'index.html'), html);
+  fs.writeFileSync(path.join(DOCS_DIR, 'impact-dashboard.html'), html);
+  fs.writeFileSync(path.join(DOCS_DIR, 'index.html'), buildDatasetRedirect());
 
   // ── Write docs/widget.html (embeddable stats-only widget) ──
   const widget = buildWidget(stats, pubData.metadata.last_updated);
   fs.writeFileSync(path.join(DOCS_DIR, 'widget.html'), widget);
 
-  console.log('Dashboard generated: docs/index.html');
+  console.log('Dataset-only root generated: docs/index.html');
+  console.log('Legacy impact dashboard generated: docs/impact-dashboard.html');
   console.log('Widget generated: docs/widget.html');
   console.log('Data exported: docs/data.json');
   console.log('Stats: ' + stats.summary.totalPublications + ' publications, '
     + stats.summary.totalCitations + ' citations');
+}
+
+function buildDatasetRedirect() {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="0; url=datasets.html">
+    <link rel="canonical" href="datasets.html">
+    <script>window.location.replace('datasets.html');</script>
+    <title>AuScope Datasets</title>
+</head>
+<body>
+    <p><a href="datasets.html">Open the AuScope datasets dashboard</a></p>
+</body>
+</html>\n`;
+}
+
+function buildSoftwareRegistry(pubs, facilityData) {
+  const facilities = (((facilityData || {}).tier3_software_use || {}).facilities || {});
+  return Object.keys(facilities).map(function(name) {
+    const patterns = facilities[name].patterns || [];
+    const needles = patterns.map(function(p) { return String(p).toLowerCase(); });
+    const matches = pubs.filter(function(p) {
+      if (p.evidence !== 'text-software') return false;
+      const text = [p.title, p.subject].concat(p.searchTerms || []).filter(Boolean).join(' ').toLowerCase();
+      return needles.some(function(n) { return text.indexOf(n) !== -1; });
+    }).map(function(p) {
+      return { doi:p.doi || '', title:decodeEntities(String(p.title || '')), authors:decodeEntities(String(p.authors || '')), year:p.year || '', journal:decodeEntities(String(p.journal || '')), cited:parseInt(p.cited) || 0, oa:/^yes$/i.test(String(p.isOA || '')) };
+    });
+    const years = matches.map(function(p) { return Number(p.year); }).filter(Boolean);
+    return {
+      name:name,
+      aliases:patterns,
+      publications:matches.length,
+      citations:matches.reduce(function(n,p) { return n + p.cited; }, 0),
+      earliestYear:years.length ? Math.min.apply(Math, years) : null,
+      latestYear:years.length ? Math.max.apply(Math, years) : null,
+      records:matches.sort(function(a,b) { return (Number(b.year)||0)-(Number(a.year)||0) || a.title.localeCompare(b.title); })
+    };
+  });
 }
 
 // Generic/overly broad subject terms to exclude from the topic chart.

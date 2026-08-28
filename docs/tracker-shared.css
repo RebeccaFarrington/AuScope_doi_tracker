@@ -6,18 +6,18 @@
 */
 
 :root {
-    --bg: #ffffff;
-    --bg-soft: #f8fafc;
-    --bg-muted: #f1f5f9;
-    --border: #e5e7eb;
-    --border-strong: #cbd5e1;
-    --text: #0f172a;
-    --text-soft: #475569;
-    --text-muted: #94a3b8;
-    --accent: #2563eb;
-    --accent-strong: #1d4ed8;
-    --accent-soft: #dbeafe;
-    --accent-bg: #eff6ff;
+    --bg: #fffafd;
+    --bg-soft: #fff0f7;
+    --bg-muted: #fde3f0;
+    --border: #f3c6dd;
+    --border-strong: #eaa4c8;
+    --text: #3b1730;
+    --text-soft: #70435d;
+    --text-muted: #a66f8d;
+    --accent: #e0218a;
+    --accent-strong: #b5166d;
+    --accent-soft: #f8badb;
+    --accent-bg: #fff0f8;
     --good: #16a34a;
     --good-bg: #dcfce7;
     --warn: #ca8a04;

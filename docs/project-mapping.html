@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AuScope Project Mapping</title>
+    <link rel="stylesheet" href="tracker-shared.css">
+    <style>
+        .tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--border); }
+        .tab { color:var(--text-soft); padding:8px 12px; text-decoration:none; border-bottom:3px solid transparent; font-size:13px; font-weight:600; }
+        .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+        .tab:hover { color:var(--accent-strong); }
+        .stats { grid-template-columns:repeat(4,1fr); }
+        .table-wrap { overflow:auto; max-height:70vh; }
+        table.data { min-width:1450px; }
+        table.data thead th { position:sticky; top:0; z-index:2; }
+        table.data tbody tr:hover { background:var(--accent-bg); }
+        table.data th[aria-sort="ascending"] .arrow::after { content:'▲'; }
+        table.data th[aria-sort="descending"] .arrow::after { content:'▼'; }
+        .project-id { font-family:var(--mono); color:var(--accent-strong); font-weight:600; white-space:nowrap; }
+        .mapping-tree { display:flex; flex-direction:column; gap:10px; }
+        .tree-lens, .tree-program { border:1px solid var(--border); border-radius:8px; background:var(--bg-soft); overflow:hidden; }
+        .tree-program { margin:8px 12px 12px; background:var(--bg); }
+        .tree-lens > summary, .tree-program > summary { cursor:pointer; list-style:none; display:flex; align-items:center; gap:9px; padding:12px 14px; font-weight:600; }
+        .tree-program > summary { padding:10px 12px; color:var(--accent-strong); }
+        .tree-lens > summary::-webkit-details-marker, .tree-program > summary::-webkit-details-marker { display:none; }
+        .tree-lens > summary::before, .tree-program > summary::before { content:'›'; color:var(--accent); font-size:20px; line-height:1; transition:transform .12s; }
+        .tree-lens[open] > summary::before, .tree-program[open] > summary::before { transform:rotate(90deg); }
+        .tree-count { margin-left:auto; background:var(--accent-soft); color:var(--accent-strong); border-radius:12px; padding:2px 8px; font-size:11px; }
+        .project-list { list-style:none; margin:0; padding:0 12px 12px 38px; }
+        .project-item { border-top:1px solid var(--border); padding:11px 8px; }
+        .project-title { font-weight:600; color:var(--text); }
+        .project-meta { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:5px; color:var(--text-soft); font-size:12px; }
+        .project-meta span { white-space:nowrap; }
+        .order-badge { display:inline-block; min-width:28px; text-align:center; background:var(--bg-muted); color:var(--text-soft); border-radius:10px; padding:1px 7px; font:11px var(--mono); margin-right:7px; }
+        .source-note { color:var(--text-soft); font-size:12px; margin:-4px 0 18px; }
+        .source-note a { color:var(--accent); }
+        .empty-state { padding:36px !important; text-align:center; color:var(--text-soft); }
+        .foot { margin-top:18px; color:var(--text-muted); font-size:11px; }
+        @media (max-width:900px) { .stats { grid-template-columns:repeat(2,1fr); } }
+    </style>
+</head>
+<body>
+<main class="wrap">
+    <header class="topbar">
+        <div class="brand">
+            <h1><img src="assets/auscope-logo.png" class="auscope-logo" alt="AuScope" data-fallback="auscope"><span class="accent">Project Mapping</span></h1>
+            <p>AuScope project identifiers mapped to lenses, programs, public names and delivery details.</p>
+        </div>
+    </header>
+
+    <nav class="tabs" aria-label="Dataset views">
+        <a class="tab" href="datasets.html">Platform trackers</a>
+        <a class="tab" href="dataset-registry.html">Dataset Registry</a>
+        <a class="tab active" href="project-mapping.html" aria-current="page">Project Mapping</a>
+        <a class="tab" href="software-registry.html">Software Registry</a>
+    </nav>
+
+    <section class="stats" aria-label="Project mapping summary">
+        <div class="stat"><div class="label">Mapping rows</div><div class="value" id="stat-total">&mdash;</div><div class="sub">from source sheet</div></div>
+        <div class="stat"><div class="label">Project IDs</div><div class="value" id="stat-ids">&mdash;</div><div class="sub">distinct identifiers</div></div>
+        <div class="stat"><div class="label">Lenses</div><div class="value" id="stat-lenses">&mdash;</div><div class="sub">classification lenses</div></div>
+        <div class="stat"><div class="label">Programs</div><div class="value" id="stat-programs">&mdash;</div><div class="sub">AuScope programs</div></div>
+    </section>
+
+    <p class="source-note">Sourced from the shared <a id="source-link" href="#" target="_blank" rel="noopener">Project Mapping sheet</a>. Labels are preserved as supplied.</p>
+
+    <div class="controls">
+        <input id="search" type="search" placeholder="Search project ID, name, lens, program, host or leader&hellip;" aria-label="Search project mappings">
+        <select id="lens" aria-label="Filter by lens"><option value="">All lenses</option></select>
+        <select id="program" aria-label="Filter by program"><option value="">All programs</option></select>
+        <button class="btn" id="reset" type="button">Reset</button>
+        <span class="spacer"></span>
+        <button class="btn primary" id="export" type="button">Export CSV</button>
+        <span class="meta" id="result-count">Loading&hellip;</span>
+    </div>
+
+    <div class="mapping-tree" id="mapping-tree"><div class="empty-state"><span class="spinner"></span> Loading project mappings&hellip;</div></div>
+    <p class="foot">Project mapping reference used by the Dataset Registry.</p>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="tracker-chassis.js"></script>
+<script>
+(function() {
+    'use strict';
+    var rows=[], visible=[];
+    var tree=document.getElementById('mapping-tree'), search=document.getElementById('search');
+    var lens=document.getElementById('lens'), program=document.getElementById('program');
+
+    fetch('registry-enrichment.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(function(data){
+        rows=(data.mappings||[]).map(function(r,i){ r.sourceOrder=i+1; r._search=Object.keys(r).filter(function(k){return k!=='_search';}).map(function(k){return r[k];}).join(' ').toLowerCase(); return r; });
+        document.getElementById('source-link').href=data.source;
+        populate(lens, unique(rows.map(function(r){return r.lens;}).filter(Boolean)).sort());
+        populate(program, unique(rows.map(function(r){return r.program;}).filter(Boolean)).sort());
+        setStat('stat-total',rows.length); setStat('stat-ids',unique(rows.map(function(r){return r.secondaryId;}).filter(Boolean)).length);
+        setStat('stat-lenses',lens.options.length-1); setStat('stat-programs',program.options.length-1); render();
+    }).catch(function(err){ tree.innerHTML='<div class="empty-state">Could not load project mappings: '+escapeHtml(err.message)+'</div>'; });
+
+    function populate(el,values){ values.forEach(function(v){el.add(new Option(v,v));}); }
+    function unique(a){return a.filter(function(v,i){return a.indexOf(v)===i;});}
+    function setStat(id,n){document.getElementById(id).textContent=Number(n).toLocaleString('en-AU');}
+    function render(){
+        var q=search.value.trim().toLowerCase();
+        visible=rows.filter(function(r){return (!q||r._search.indexOf(q)!==-1)&&(!lens.value||r.lens===lens.value)&&(!program.value||r.program===program.value);});
+        document.getElementById('result-count').textContent=visible.length.toLocaleString('en-AU')+' of '+rows.length.toLocaleString('en-AU')+' mappings';
+        if(!visible.length){tree.innerHTML='<div class="empty-state">No project mappings match the current filters.</div>';return;}
+        var grouped={};
+        visible.forEach(function(r){var l=r.lens||'Unassigned lens',p=r.program||'Unassigned program';if(!grouped[l])grouped[l]={};if(!grouped[l][p])grouped[l][p]=[];grouped[l][p].push(r);});
+        var autoOpen=!!(q||lens.value||program.value);
+        tree.innerHTML=Object.keys(grouped).map(function(lensName){
+            var programs=grouped[lensName],lensCount=Object.keys(programs).reduce(function(n,p){return n+programs[p].length;},0);
+            return '<details class="tree-lens"'+(autoOpen?' open':'')+'><summary>'+escapeHtml(lensName)+'<span class="tree-count">'+lensCount+' project'+(lensCount===1?'':'s')+'</span></summary>'
+                +Object.keys(programs).map(function(programName){var projects=programs[programName];return '<details class="tree-program"'+(autoOpen?' open':'')+'><summary>'+escapeHtml(programName)+'<span class="tree-count">'+projects.length+'</span></summary><ol class="project-list">'+projects.map(renderProject).join('')+'</ol></details>';}).join('')+'</details>';
+        }).join('');
+    }
+    function renderProject(r){
+        var title=r.project||r.fundingName||'Unnamed project';
+        return '<li class="project-item"><div class="project-title"><span class="order-badge" title="Original sheet order">'+r.sourceOrder+'</span>'+escapeHtml(title)+'</div><div class="project-meta">'
+            +(r.secondaryId?'<span><strong>Project ID:</strong> <span class="project-id">'+escapeHtml(r.secondaryId)+'</span></span>':'')
+            +(r.fundingName&&r.fundingName!==title?'<span><strong>Funding name:</strong> '+escapeHtml(r.fundingName)+'</span>':'')
+            +(r.type?'<span><strong>Type:</strong> '+escapeHtml(r.type)+'</span>':'')
+            +(r.host?'<span><strong>Host:</strong> '+escapeHtml(r.host)+'</span>':'')
+            +(r.leader?'<span><strong>Leader:</strong> '+escapeHtml(r.leader)+'</span>':'')
+            +(r.ncris?'<span><strong>NCRIS:</strong> '+escapeHtml(r.ncris)+'</span>':'')+'</div></li>';
+    }
+    search.addEventListener('input',debounce(render,120));lens.addEventListener('change',render);program.addEventListener('change',render);
+    document.getElementById('reset').addEventListener('click',function(){search.value='';lens.value='';program.value='';render();search.focus();});
+    document.getElementById('export').addEventListener('click',function(){exportCsv({rows:visible,filenamePrefix:'auscope-project-mapping',columns:[
+        {header:'Original order',value:function(r){return r.sourceOrder;}},{header:'Lens',value:function(r){return r.lens;}},{header:'Program',value:function(r){return r.program;}},{header:'Project Funding Name',value:function(r){return r.fundingName;}},{header:'Project Public Name',value:function(r){return r.project;}},{header:'Project ID',value:function(r){return r.secondaryId;}},{header:'Type',value:function(r){return r.type;}},{header:'Host',value:function(r){return r.host;}},{header:'Leader',value:function(r){return r.leader;}},{header:'NCRIS',value:function(r){return r.ncris;}}
+    ]});});
+}());
+</script>
+</body>
+</html>

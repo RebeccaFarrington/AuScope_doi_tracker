@@ -6,6 +6,7 @@
  *   1. EarthBank (DataCite API)
  *   2. AusPass (FDSN station + networks API)
  *   3. NCI GeoNetwork (MT + DAS collections)
+ *   4. NVCL (the national citable collection)
  *
  * Stores in data/datasets.json. Run as part of the weekly GitHub Action.
  *
@@ -59,6 +60,18 @@ async function run() {
   } catch (err) {
     console.error('NCI DAS error: ' + err.message);
   }
+
+  // NVCL publishes thousands of per-borehole scan records beneath one
+  // citable NCI collection. Keep the registry at the citable-resource level.
+  allDatasets.push({
+    doi: '10.25914/bztg-rg43',
+    name: 'AuScope Australian National Virtual Core Library (NVCL) Collection',
+    authors: 'AuScope; CSIRO',
+    year: 2023,
+    platform: 'NVCL',
+    type: 'Collection'
+  });
+  console.log('NVCL: 1 citable collection');
 
   // Dedup by DOI (some datasets may appear in multiple sources)
   const deduped = dedup(allDatasets);

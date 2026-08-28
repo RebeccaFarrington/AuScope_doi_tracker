@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-25T22:06:07.550Z",
+  "generated": "2026-08-28T00:03:30.478Z",
   "pillars": {
     "publications": {
       "total": 2902,
@@ -27,9 +27,9 @@
       }
     },
     "samples": {
-      "declared": 53733,
+      "declared": 53812,
       "sampleDois": 47,
-      "dataPoints": 5312,
+      "dataPoints": 5401,
       "source": "EarthBank DataCite records"
     },
     "stations": {
@@ -80,7 +80,7 @@
     "ausis": {
       "stations": 53,
       "active": 51,
-      "streaming": 49,
+      "streaming": 50,
       "networkDoi": "10.7914/SN/S1",
       "since": 2011
     },
@@ -91,7 +91,7 @@
         "surveys": 14,
         "stations": 1354
       },
-      "generated": "2026-08-25",
+      "generated": "2026-08-27",
       "instrumentsDeployed": 48,
       "occupations": 142,
       "recordingDays": 285,

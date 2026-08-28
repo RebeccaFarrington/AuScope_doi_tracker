@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AuScope Dataset Registry</title>
+    <link rel="stylesheet" href="tracker-shared.css">
+    <style>
+        .tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--border); }
+        .tab { color:var(--text-soft); padding:8px 12px; text-decoration:none; border-bottom:3px solid transparent; font-size:13px; font-weight:600; }
+        .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+        .tab:hover { color:var(--accent-strong); }
+        .stats { grid-template-columns:repeat(5, 1fr); }
+        .registry-note { color:var(--text-soft); font-size:12px; margin:-4px 0 18px; }
+        .registry-note a { color:var(--accent); }
+        .platform-badge { background:var(--accent-soft); color:var(--accent-strong); }
+        .type-badge { background:var(--bg-muted); color:var(--text-soft); }
+        .title-link { color:var(--text); font-weight:600; text-decoration:none; }
+        .title-link:hover { color:var(--accent); text-decoration:underline; }
+        button.title-link { appearance:none; border:0; background:none; padding:0; font:inherit; font-weight:600; text-align:left; cursor:pointer; }
+        .authors { color:var(--text-soft); font-size:12px; margin-top:3px; }
+        .empty-state, .loading-state { padding:36px !important; text-align:center; color:var(--text-soft); }
+        .table-wrap { overflow:auto; max-height:70vh; }
+        table.data { min-width:1350px; }
+        table.data thead th { position:sticky; top:0; z-index:2; }
+        table.data tbody tr:hover { background:var(--accent-bg); }
+        table.data tbody tr.registry-row { cursor:pointer; }
+        table.data tbody tr.registry-row.expanded { background:var(--accent-bg); }
+        .detail-error { color:var(--bad); padding:18px; }
+        .num-value { font-variant-numeric:tabular-nums; text-align:right; }
+        .score-cell { min-width:110px; }
+        .score-bar { display:flex; align-items:center; gap:7px; min-width:92px; }
+        .score-bar .track { width:58px; height:6px; background:var(--border); border-radius:9px; overflow:hidden; }
+        .score-bar .fill { height:100%; background:var(--accent); border-radius:9px; }
+        .score-bar .pct { min-width:30px; font-size:11px; font-variant-numeric:tabular-nums; }
+        table.data th[aria-sort="ascending"] .arrow::after { content:'▲'; }
+        table.data th[aria-sort="descending"] .arrow::after { content:'▼'; }
+        .foot { margin-top:18px; color:var(--text-muted); font-size:11px; }
+        .foot a { color:var(--accent); }
+        @media (max-width:900px) {
+            .stats { grid-template-columns:repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<main class="wrap">
+    <header class="topbar">
+        <div class="brand">
+            <h1><img src="assets/auscope-logo.png" class="auscope-logo" alt="AuScope" data-fallback="auscope"><span class="accent">Dataset Registry</span></h1>
+            <p>One searchable catalogue of citable datasets across the included AuScope platforms.</p>
+        </div>
+    </header>
+
+    <nav class="tabs" aria-label="Dataset views">
+        <a class="tab" href="datasets.html">Platform trackers</a>
+        <a class="tab active" href="dataset-registry.html" aria-current="page">Dataset Registry</a>
+        <a class="tab" href="project-mapping.html">Project Mapping</a>
+        <a class="tab" href="software-registry.html">Software Registry</a>
+    </nav>
+
+    <section class="stats" aria-label="Registry summary">
+        <div class="stat"><div class="label">Registry records</div><div class="value" id="stat-total">&mdash;</div><div class="sub">citable resources</div></div>
+        <div class="stat"><div class="label">EarthBank</div><div class="value" id="stat-earthbank">&mdash;</div><div class="sub">geochemistry</div></div>
+        <div class="stat"><div class="label">AusPass</div><div class="value" id="stat-auspass">&mdash;</div><div class="sub">seismic networks</div></div>
+        <div class="stat"><div class="label">NCI</div><div class="value" id="stat-nci">&mdash;</div><div class="sub">MT + DAS</div></div>
+        <div class="stat"><div class="label">NVCL</div><div class="value" id="stat-nvcl">&mdash;</div><div class="sub">national collection</div></div>
+    </section>
+
+    <p class="registry-note">This union includes every column used by the platform tracker tables. An em dash means that field does not apply or is not present in the shared registry snapshot. NVCL's thousands of borehole scan records sit beneath one registered, citable collection and are represented by that collection here.</p>
+
+    <div class="controls">
+        <input id="search" type="search" placeholder="Search title, author, DOI or platform&hellip;" aria-label="Search registry">
+        <select id="platform" aria-label="Filter by platform"><option value="">All platforms</option></select>
+        <select id="year" aria-label="Filter by year"><option value="">All years</option></select>
+        <select id="sort" aria-label="Sort registry">
+            <option value="title-asc">Title A&ndash;Z</option>
+            <option value="year-desc">Newest first</option>
+            <option value="platform-asc">Platform</option>
+        </select>
+        <button class="btn" id="doi-only" type="button" aria-pressed="false">With DOI only</button>
+        <button class="btn" id="reset" type="button">Reset</button>
+        <span class="spacer"></span>
+        <button class="btn primary" id="export" type="button">Export CSV</button>
+        <span class="meta" id="result-count">Loading&hellip;</span>
+    </div>
+
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr>
+                <th class="sortable" data-sort="doi">DOI <span class="arrow"></span></th>
+                <th class="sortable" data-sort="title">Title <span class="arrow"></span></th>
+                <th class="sortable" data-sort="type">Type <span class="arrow"></span></th>
+                <th class="sortable" data-sort="year">Year(s) <span class="arrow"></span></th>
+                <th class="sortable" data-sort="orcids">ORCIDs <span class="arrow"></span></th>
+                <th class="sortable" data-sort="projectId">Project ID <span class="arrow"></span></th>
+                <th class="sortable" data-sort="lens">Lens <span class="arrow"></span></th>
+                <th class="sortable" data-sort="program">Program <span class="arrow"></span></th>
+                <th class="sortable" data-sort="project">Project <span class="arrow"></span></th>
+                <th class="sortable" data-sort="completeness">Mapping / Completeness <span class="arrow"></span></th>
+            </tr></thead>
+            <tbody id="registry-body"><tr><td colspan="10" class="loading-state"><span class="spinner"></span> Loading registry&hellip;</td></tr></tbody>
+        </table>
+    </div>
+
+    <p class="foot">Registry snapshot <span id="generated">&mdash;</span> &middot; <a href="datasets.html">Platform trackers</a></p>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="tracker-chassis.js"></script>
+<script>
+(function() {
+    'use strict';
+    var records = [], visible = [], doiOnly = false, fairScores = {}, nvclData = null;
+    var sortState = { key:'title', dir:'asc' };
+    var openKey = null, detailCache = {};
+    var body = document.getElementById('registry-body');
+    var search = document.getElementById('search');
+    var platform = document.getElementById('platform');
+    var year = document.getElementById('year');
+    var sort = document.getElementById('sort');
+
+    Promise.all([
+        fetch('datasets-data.json').then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+        fetch('fair-scores.json').then(function(r) { return r.ok ? r.json() : { scores:{} }; }).catch(function() { return { scores:{} }; }),
+        fetch('nvcl-data.json').then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
+        fetch('registry-enrichment.json').then(function(r) { return r.ok ? r.json() : { records:{}, projects:{} }; }).catch(function() { return { records:{}, projects:{} }; })
+    ]).then(function(feeds) {
+        var data = feeds[0];
+        fairScores = feeds[1].scores || {};
+        nvclData = feeds[2];
+        var enrichment = feeds[3] || { records:{}, projects:{} };
+        records = (data.records || []).map(function(r) {
+            var extra = enrichment.records[normaliseDoi(r.doi)] || {};
+            r.orcids = extra.orcids || '';
+            r.completeness = extra.completeness == null ? null : Number(extra.completeness);
+            var project = enrichment.projects[projectIdFor(r)] || {};
+            r.projectId = project.projectId || '';
+            r.lens = project.lens || '';
+            r.program = project.program || '';
+            r.project = assignedProjectName(r) || project.project || '';
+            var fair = fairScores[normaliseDoi(r.doi)];
+            r.fair = fair && fair.s != null ? Number(fair.s) : null;
+            if (r.platform === 'NVCL' && nvclData) addNvclFields(r, nvclData);
+            if (!r.verifyUrl) r.verifyUrl = trackerUrl(r);
+            r._search = [r.name, r.authors, r.doi, r.platform, r.subset, r.type, r.orcids, r.projectId, r.lens, r.program, r.project].filter(Boolean).join(' ').toLowerCase();
+            return r;
+        });
+        document.getElementById('generated').textContent = formatDate(data.generated);
+        populateFilters();
+        renderStats();
+        render();
+    }).catch(function(err) {
+        body.innerHTML = '<tr><td colspan="10" class="empty-state">Could not load the registry feed. ' + escapeHtml(err.message) + '</td></tr>';
+        document.getElementById('result-count').textContent = 'Unavailable';
+    });
+
+    function platformLabel(r) { return r.platform === 'NCI' && r.subset ? 'NCI ' + r.subset : r.platform; }
+    function projectIdFor(r) {
+        if (r.platform === 'EarthBank') return '0.0';
+        if (r.platform === 'AusPass') return '3.31';
+        if (r.platform === 'NCI' && r.subset === 'MT') return '3.33';
+        if (r.platform === 'NCI' && r.subset === 'DAS') return '3.31';
+        if (r.platform === 'NVCL') return '3.41';
+        return '';
+    }
+    function assignedProjectName(r) {
+        if (r.platform === 'EarthBank') return 'EarthBank';
+        if (r.platform === 'AusPass') return 'Passive Seismic';
+        if (r.platform === 'NCI' && r.subset === 'DAS') return 'Passive Seismic';
+        if (r.platform === 'NCI' && r.subset === 'MT') return 'Magentotellurics';
+        if (r.platform === 'NVCL') return 'National Virtual Core Library';
+        return '';
+    }
+    function trackerUrl(r) {
+        if (r.platform === 'EarthBank') return 'earthbank.html';
+        if (r.platform === 'AusPass') return 'auspass.html';
+        if (r.platform === 'NCI') return r.subset === 'DAS' ? 'nci-das.html' : 'nci-mt.html';
+        if (r.platform === 'NVCL') return 'nvcl.html';
+        return '';
+    }
+
+    function addNvclFields(r, data) {
+        var s = data.summary || {};
+        r.state = 'National';
+        r.boreholes = s.total_boreholes_with_data;
+        r.datasetCount = s.total_datasets;
+        r.kmScanned = s.unique_scanned_km;
+        r.latestData = s.date_range && s.date_range.latest_scan;
+        r.freshness = r.latestData ? daysSince(r.latestData) + ' days' : null;
+        r.verifyUrl = 'nvcl.html';
+    }
+
+    function populateFilters() {
+        var platforms = unique(records.map(platformLabel)).sort();
+        var years = unique(records.map(function(r) { return r.year; }).filter(Boolean)).sort(function(a,b) { return b-a; });
+        platforms.forEach(function(v) { platform.add(new Option(v, v)); });
+        years.forEach(function(v) { year.add(new Option(v, v)); });
+    }
+
+    function renderStats() {
+        setText('stat-total', records.length);
+        setText('stat-earthbank', count('EarthBank'));
+        setText('stat-auspass', count('AusPass'));
+        setText('stat-nci', count('NCI'));
+        setText('stat-nvcl', count('NVCL'));
+    }
+
+    function count(name) { return records.filter(function(r) { return r.platform === name; }).length; }
+    function setText(id, n) { document.getElementById(id).textContent = Number(n).toLocaleString('en-AU'); }
+
+    function render() {
+        var q = search.value.trim().toLowerCase();
+        visible = records.filter(function(r) {
+            return (!q || r._search.indexOf(q) !== -1)
+                && (!platform.value || platformLabel(r) === platform.value)
+                && (!year.value || String(r.year) === year.value)
+                && (!doiOnly || !!r.doi);
+        });
+        visible.sort(comparator(sortState.key, sortState.dir));
+        updateSortHeaders();
+        document.getElementById('result-count').textContent = visible.length.toLocaleString('en-AU') + ' of ' + records.length.toLocaleString('en-AU') + ' records';
+        if (!visible.length) {
+            body.innerHTML = '<tr><td colspan="10" class="empty-state">No datasets match the current filters.</td></tr>';
+            return;
+        }
+        body.innerHTML = visible.map(function(r, i) {
+            var label = platformLabel(r);
+            var key = recordKey(r);
+            var title = '<button class="title-link" type="button" data-expand="' + escapeAttr(key) + '" aria-expanded="' + (openKey === key ? 'true' : 'false') + '">' + escapeHtml(r.name || 'Untitled') + '</button>';
+            var doi = r.doi ? '<a class="doi" href="https://doi.org/' + escapeAttr(r.doi) + '" target="_blank" rel="noopener">' + escapeHtml(r.doi) + '</a>' : '&mdash;';
+            var row = '<tr class="registry-row' + (openKey === key ? ' expanded' : '') + '" data-key="' + escapeAttr(key) + '">'
+                + '<td>' + doi + '</td>'
+                + '<td>' + title + '</td>'
+                + '<td><span class="badge type-badge">' + escapeHtml(r.type || 'Dataset') + '</span></td>'
+                + '<td>' + cell(r.years || r.year) + '</td>'
+                + '<td>' + orcidCell(r.orcids) + '</td>'
+                + '<td>' + cell(r.projectId) + '</td>'
+                + '<td>' + cell(r.lens) + '</td>'
+                + '<td>' + cell(r.program) + '</td>'
+                + '<td>' + cell(r.project) + '</td>'
+                + '<td class="score-cell">' + scoreCell(r.mapping != null ? r.mapping : r.completeness) + '</td></tr>';
+            if (openKey === key) row += '<tr class="detail-row"><td colspan="10"><div class="detail" data-key="' + escapeAttr(key) + '">' + renderDetailShell(r, detailCache[key]) + '</div></td></tr>';
+            return row;
+        }).join('');
+    }
+
+    function orcidCell(value) {
+        if (!value) return '&mdash;';
+        return String(value).split(';').map(function(id) {
+            id = id.trim();
+            return id ? '<a class="doi" href="https://orcid.org/' + escapeAttr(id) + '" target="_blank" rel="noopener">' + escapeHtml(id) + '</a>' : '';
+        }).filter(Boolean).join('<br>');
+    }
+
+    function recordKey(r) { return normaliseDoi(r.doi) || platformLabel(r) + ':' + String(r.name || ''); }
+    function renderDetailShell(r, detail) {
+        if (!detail) return '<div class="empty-state"><span class="spinner"></span> Loading DataCite metadata&hellip;</div>';
+        if (detail.error) return '<div class="detail-error">Could not load detailed metadata: ' + escapeHtml(detail.error) + '</div>';
+        var a = detail.attrs, mapping = detail.mapping, fair = fairScores[normaliseDoi(r.doi)] || null;
+        var related = a.relatedIdentifiers || [];
+        var citations = Number(a.citationCount || a.citations || 0);
+        return '<div class="detail-tabs">'
+            + tabButton('overview', 'Overview', '', true)
+            + tabButton('mapping', 'Mapping check', mapping.score + '%')
+            + tabButton('fuji', 'F-UJI check', fair ? Math.round(Number(fair.s)) + '%' : '')
+            + tabButton('related', 'Related', related.length)
+            + tabButton('citations', 'Citations', citations)
+            + tabButton('raw', 'Raw JSON', '') + '</div>'
+            + pane('overview', renderOverview(a, r), true)
+            + pane('mapping', renderMapping(mapping))
+            + pane('fuji', renderFuji(fair))
+            + pane('related', renderRelated(related))
+            + pane('citations', renderCitations(a, citations))
+            + pane('raw', '<pre class="raw-json">' + syntaxHighlightJson(JSON.stringify(a, null, 2)) + '</pre>');
+    }
+    function tabButton(id, label, badge, active) { return '<button class="detail-tab' + (active ? ' active' : '') + '" data-pane="' + id + '">' + label + (badge !== '' ? ' <span class="badge-count">' + escapeHtml(badge) + '</span>' : '') + '</button>'; }
+    function pane(id, html, active) { return '<div class="detail-pane' + (active ? ' active' : '') + '" data-pane="' + id + '">' + html + '</div>'; }
+
+    function renderOverview(a, r) {
+        var creators = (a.creators || []).map(function(c) { return c.name || [c.givenName,c.familyName].filter(Boolean).join(' '); }).filter(Boolean).join('; ');
+        var descriptions = (a.descriptions || []).map(function(d) { return d.description; }).filter(Boolean).join('\n\n');
+        var subjects = (a.subjects || []).map(function(s) { return s.subject; }).filter(Boolean).join('; ');
+        var rights = (a.rightsList || []).map(function(x) { return x.rights || x.rightsIdentifier; }).filter(Boolean).join('; ');
+        return '<dl class="ov-grid">'
+            + '<dt>DOI</dt><dd><a href="https://doi.org/' + escapeAttr(r.doi) + '" target="_blank" rel="noopener"><span class="mono">' + escapeHtml(r.doi) + '</span> ↗</a></dd>'
+            + '<dt>Title</dt><dd>' + cell(firstTitle(a) || r.name) + '</dd>'
+            + '<dt>Creators</dt><dd>' + cell(creators) + '</dd>'
+            + '<dt>Publisher</dt><dd>' + cell(typeof a.publisher === 'object' ? a.publisher.name : a.publisher) + '</dd>'
+            + '<dt>Publication year</dt><dd>' + cell(a.publicationYear || r.year) + '</dd>'
+            + '<dt>Resource type</dt><dd>' + cell(a.types && (a.types.resourceType || a.types.resourceTypeGeneral)) + '</dd>'
+            + '<dt>Language</dt><dd>' + cell(a.language) + '</dd>'
+            + '<dt>Subjects</dt><dd>' + cell(subjects) + '</dd>'
+            + '<dt>Description</dt><dd style="white-space:pre-wrap">' + cell(descriptions) + '</dd>'
+            + '<dt>Rights / licence</dt><dd>' + cell(rights) + '</dd>'
+            + '<dt>Landing page</dt><dd>' + (a.url ? '<a href="' + escapeAttr(a.url) + '" target="_blank" rel="noopener">' + escapeHtml(a.url) + ' ↗</a>' : '&mdash;') + '</dd>'
+            + '<dt>Registered / updated</dt><dd>' + cell([shortDate(a.registered || a.created), shortDate(a.updated)].filter(Boolean).join(' · ')) + '</dd></dl>';
+    }
+    function firstTitle(a) { return a.titles && a.titles[0] && a.titles[0].title; }
+    function shortDate(v) { return v ? String(v).substring(0,10) : ''; }
+
+    function mappingChecks(a) {
+        var checks = [
+            ['Title', !!firstTitle(a), 15], ['Creators', !!(a.creators || []).length, 15],
+            ['Publication year', !!a.publicationYear, 10], ['Publisher', !!a.publisher, 10],
+            ['Description', !!(a.descriptions || []).length, 10], ['Subjects', !!(a.subjects || []).length, 8],
+            ['Licence', !!(a.rightsList || []).length, 8], ['Related identifiers', !!(a.relatedIdentifiers || []).length, 7],
+            ['Geolocation', !!(a.geoLocations || []).length, 5], ['Funding references', !!(a.fundingReferences || []).length, 5],
+            ['Language', !!a.language, 4], ['Formats / sizes', !!((a.formats || []).length || (a.sizes || []).length), 3]
+        ];
+        var score = checks.reduce(function(n,c) { return n + (c[1] ? c[2] : 0); }, 0);
+        return { score:score, checks:checks };
+    }
+    function renderMapping(m) {
+        var html = '<div class="summary-banner ' + (m.score >= 80 ? 'good' : m.score >= 60 ? 'warn' : 'bad') + '"><strong>' + m.score + '% complete</strong> · DataCite metadata coverage across the registry checks.</div><ul class="check-list">';
+        m.checks.forEach(function(c) { html += '<li class="check ' + (c[1] ? 'good' : 'bad') + '"><div class="icon">' + (c[1] ? '✓' : '✗') + '</div><div class="body"><div class="name">' + escapeHtml(c[0]) + '</div><div class="value">Weight ' + c[2] + '%</div></div></li>'; });
+        return html + '</ul>';
+    }
+    function renderFuji(fair) {
+        if (!fair) return '<div class="empty-state">Not yet assessed.</div>';
+        var html = '<div class="summary-banner"><strong>' + escapeHtml(fair.s) + '% FAIR score</strong> · F ' + escapeHtml(fair.f) + '% · A ' + escapeHtml(fair.a) + '% · I ' + escapeHtml(fair.i) + '% · R ' + escapeHtml(fair.r) + '%</div><ul class="check-list">';
+        (fair.checks || []).forEach(function(c) { var ok=Number(c[1])===Number(c[2]), partial=Number(c[1])>0&&!ok; html += '<li class="check ' + (ok?'good':partial?'warn':'bad') + '"><div class="icon">' + (ok?'✓':partial?'!':'✗') + '</div><div class="body"><div class="name">' + escapeHtml(String(c[0]||'').replace(/^FsF-/,'')) + '</div><div class="value">' + escapeHtml(c[1] + ' / ' + c[2]) + '</div></div></li>'; });
+        return html + '</ul>';
+    }
+    function renderRelated(items) {
+        if (!items.length) return '<div class="empty-state">No related identifiers declared.</div>';
+        return '<table class="rel-table"><thead><tr><th>Relation</th><th>Identifier</th><th>Type</th><th>Resource</th></tr></thead><tbody>' + items.map(function(x) { var id=x.relatedIdentifier||''; var link=(x.relatedIdentifierType||'').toUpperCase()==='DOI'?'<a href="https://doi.org/'+escapeAttr(id)+'" target="_blank" rel="noopener">'+escapeHtml(id)+'</a>':escapeHtml(id); return '<tr><td>'+cell(x.relationType)+'</td><td>'+link+'</td><td>'+cell(x.relatedIdentifierType)+'</td><td>'+cell(x.resourceTypeGeneral)+'</td></tr>'; }).join('') + '</tbody></table>';
+    }
+    function renderCitations(a, count) {
+        var citedBy=(a.relatedIdentifiers||[]).filter(function(x){ return /^(IsCitedBy|IsReferencedBy)$/.test(x.relationType||''); });
+        return '<div class="summary-banner"><strong>' + count.toLocaleString('en-AU') + ' citations</strong> reported by DataCite.</div>' + (citedBy.length ? renderRelated(citedBy) : '<div class="empty-state">No citing works are declared in relatedIdentifiers.</div>');
+    }
+
+    function cell(v) { return v == null || v === '' ? '&mdash;' : escapeHtml(v); }
+    function numberCell(v, digits) { return v == null ? '&mdash;' : Number(v).toLocaleString('en-AU', { maximumFractionDigits:digits == null ? 0 : digits }); }
+    function scoreCell(v) {
+        if (v == null) return '&mdash;';
+        var n = Math.max(0, Math.min(100, Number(v)));
+        return '<div class="score-bar"><div class="track"><div class="fill" style="width:' + n + '%"></div></div><div class="pct">' + Math.round(n) + '%</div></div>';
+    }
+    function citationCell(v) { return v == null ? '&mdash;' : '<span class="cite-pill' + (Number(v) ? '' : ' zero') + '">' + Number(v).toLocaleString('en-AU') + '</span>'; }
+    function daysSince(iso) { return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)); }
+
+    function sortValue(r, key) {
+        if (key === 'title') return r.name;
+        if (key === 'platform') return platformLabel(r);
+        if (key === 'completeness') return r.mapping != null ? r.mapping : r.completeness;
+        if (key === 'freshness') return r.latestData ? daysSince(r.latestData) : null;
+        return r[key];
+    }
+    function comparator(key, dir) {
+        return function(a,b) {
+            var av = sortValue(a,key), bv = sortValue(b,key);
+            if (av == null || av === '') return bv == null || bv === '' ? titleCompare(a,b) : 1;
+            if (bv == null || bv === '') return -1;
+            var result = typeof av === 'number' && typeof bv === 'number'
+                ? av - bv : String(av).localeCompare(String(bv), undefined, { numeric:true, sensitivity:'base' });
+            return (dir === 'desc' ? -result : result) || titleCompare(a,b);
+        };
+    }
+    function setSort(key, dir) {
+        sortState.key = key;
+        sortState.dir = dir;
+        var option = key + '-' + dir;
+        if (sort.querySelector('option[value="' + option + '"]')) sort.value = option;
+        render();
+    }
+    function updateSortHeaders() {
+        document.querySelectorAll('th.sortable').forEach(function(th) {
+            var active = th.getAttribute('data-sort') === sortState.key;
+            th.classList.toggle('sorted', active);
+            th.setAttribute('aria-sort', active ? (sortState.dir === 'asc' ? 'ascending' : 'descending') : 'none');
+        });
+    }
+    function titleCompare(a,b) { return String(a.name || '').localeCompare(String(b.name || '')); }
+    function unique(a) { return a.filter(function(v,i) { return a.indexOf(v) === i; }); }
+    function formatDate(v) { var d = new Date(v); return isNaN(d) ? '\u2014' : d.toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' }); }
+
+    search.addEventListener('input', debounce(render, 120));
+    platform.addEventListener('change', render);
+    year.addEventListener('change', render);
+    sort.addEventListener('change', function() {
+        var bits = this.value.split('-');
+        setSort(bits.slice(0, -1).join('-'), bits[bits.length - 1]);
+    });
+    document.querySelector('table.data thead').addEventListener('click', function(e) {
+        var th = e.target.closest('th.sortable');
+        if (!th) return;
+        var key = th.getAttribute('data-sort');
+        setSort(key, sortState.key === key && sortState.dir === 'asc' ? 'desc' : 'asc');
+    });
+    document.querySelectorAll('th.sortable').forEach(function(th) {
+        th.tabIndex = 0;
+        th.setAttribute('role', 'button');
+        th.addEventListener('keydown', function(e) {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            th.click();
+        });
+    });
+    body.addEventListener('click', function(e) {
+        var tab = e.target.closest('.detail-tab');
+        if (tab) {
+            var detail = tab.closest('.detail');
+            detail.querySelectorAll('.detail-tab').forEach(function(x) { x.classList.toggle('active', x === tab); });
+            detail.querySelectorAll('.detail-pane').forEach(function(x) { x.classList.toggle('active', x.getAttribute('data-pane') === tab.getAttribute('data-pane')); });
+            return;
+        }
+        var expand = e.target.closest('[data-expand]');
+        if (expand) {
+            toggleDetail(expand.getAttribute('data-expand'));
+            return;
+        }
+        if (e.target.closest('a, button, input, select')) return;
+        var row = e.target.closest('tr.registry-row');
+        if (!row) return;
+        toggleDetail(row.getAttribute('data-key'));
+    });
+
+    function toggleDetail(key) {
+        openKey = openKey === key ? null : key;
+        render();
+        if (openKey && !detailCache[key]) loadDetails(key);
+    }
+
+    function loadDetails(key) {
+        var r = records.find(function(x) { return recordKey(x) === key; });
+        if (!r) return;
+        if (!r.doi) {
+            var attrs = { titles:[{title:r.name}], creators:r.authors ? [{name:r.authors}] : [], publicationYear:r.year, types:{resourceType:r.type} };
+            detailCache[key] = { attrs:attrs, mapping:mappingChecks(attrs) };
+            render();
+            return;
+        }
+        fetch('https://api.datacite.org/dois/' + encodeURIComponent(r.doi), { headers:{ Accept:'application/vnd.api+json' } })
+            .then(function(resp) { if (!resp.ok) throw new Error('DataCite HTTP ' + resp.status); return resp.json(); })
+            .then(function(data) {
+                var attrs = data.data && data.data.attributes ? data.data.attributes : {};
+                detailCache[key] = { attrs:attrs, mapping:mappingChecks(attrs) };
+                if (openKey === key) render();
+            }).catch(function(err) {
+                detailCache[key] = { error:err.message };
+                if (openKey === key) render();
+            });
+    }
+    document.getElementById('doi-only').addEventListener('click', function() {
+        doiOnly = !doiOnly;
+        this.classList.toggle('toggled', doiOnly);
+        this.setAttribute('aria-pressed', String(doiOnly));
+        render();
+    });
+    document.getElementById('reset').addEventListener('click', function() {
+        search.value = '';
+        platform.value = '';
+        year.value = '';
+        doiOnly = false;
+        document.getElementById('doi-only').classList.remove('toggled');
+        document.getElementById('doi-only').setAttribute('aria-pressed', 'false');
+        setSort('title', 'asc');
+        search.focus();
+    });
+    document.getElementById('export').addEventListener('click', function() {
+        exportCsv({
+            rows: visible,
+            filenamePrefix: 'auscope-dataset-registry',
+            columns: [
+                { header:'DOI', value:function(r){ return r.doi; } },
+                { header:'Title', value:function(r){ return r.name; } },
+                { header:'Type', value:function(r){ return r.type; } },
+                { header:'Year', value:function(r){ return r.years || r.year; } },
+                { header:'ORCIDs', value:function(r){ return r.orcids; } },
+                { header:'Project ID', value:function(r){ return r.projectId; } },
+                { header:'Lens', value:function(r){ return r.lens; } },
+                { header:'Program', value:function(r){ return r.program; } },
+                { header:'Project', value:function(r){ return r.project; } },
+                { header:'MappingCompleteness', value:function(r){ return r.mapping != null ? r.mapping : r.completeness; } },
+            ]
+        });
+    });
+}());
+</script>
+</body>
+</html>

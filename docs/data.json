@@ -1,8 +1,8 @@
 {
-  "generated": "2026-08-25T22:06:07.677Z",
+  "generated": "2026-08-28T02:55:08.425Z",
   "stats": {
     "totalPublications": 2902,
-    "totalDatasets": 216,
+    "totalDatasets": 217,
     "totalCitations": 67251,
     "citedPublications": 2306,
     "citedPercent": 79.5,
@@ -315,8 +315,8 @@
     }
   ],
   "evidenceBreakdown": {
-    "text-attributed": 656,
-    "keyword": 1920,
+    "text-attributed": 655,
+    "keyword": 1921,
     "text-software": 321,
     "text-infrastructure": 5
   }
