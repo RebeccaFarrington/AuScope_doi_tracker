@@ -91,8 +91,9 @@
     </header>
 
     <nav class="tabs" aria-label="Dataset views">
-        <a class="tab" href="datasets.html">Platform trackers</a>
         <a class="tab active" href="dataset-registry.html" aria-current="page">Dataset Registry</a>
+        <a class="tab" href="fair-trends.html">F-UJI FAIR Trends</a>
+        <a class="tab" href="datasets.html">Platform Trackers</a>
         <a class="tab" href="project-mapping.html">Project Mapping</a>
         <a class="tab" href="software-registry.html">Software Registry</a>
     </nav>
@@ -116,6 +117,7 @@
         <select id="type-filter" aria-label="Filter by type"><option value="">All types</option></select>
         <select id="year" aria-label="Filter by year"><option value="">All years</option></select>
         <select id="sort" aria-label="Sort registry">
+            <option value="fair-desc">Highest F-UJI, then metadata</option>
             <option value="title-asc">Title A&ndash;Z</option>
             <option value="year-desc">Newest first</option>
             <option value="platform-asc">Platform</option>
@@ -155,7 +157,7 @@
 (function() {
     'use strict';
     var records = [], visible = [], doiOnly = false, fairOnly = false, fairScores = {}, fairMetadata = {}, nvclData = null;
-    var sortState = { key:'title', dir:'asc' };
+    var sortState = { key:'fair', dir:'desc' };
     var openKey = null, detailCache = {};
     var body = document.getElementById('registry-body');
     var search = document.getElementById('search');
@@ -437,11 +439,27 @@
     function comparator(key, dir) {
         return function(a,b) {
             var av = sortValue(a,key), bv = sortValue(b,key);
-            if (av == null || av === '') return bv == null || bv === '' ? titleCompare(a,b) : 1;
+            if (av == null || av === '') {
+                if (bv != null && bv !== '') return 1;
+                if (key === 'fair') {
+                    var an = sortValue(a, 'completeness'), bn = sortValue(b, 'completeness');
+                    if (an != null && bn != null && an !== bn) return bn - an;
+                    if (an != null && bn == null) return -1;
+                    if (an == null && bn != null) return 1;
+                }
+                return titleCompare(a,b);
+            }
             if (bv == null || bv === '') return -1;
             var result = typeof av === 'number' && typeof bv === 'number'
                 ? av - bv : String(av).localeCompare(String(bv), undefined, { numeric:true, sensitivity:'base' });
-            return (dir === 'desc' ? -result : result) || titleCompare(a,b);
+            result = dir === 'desc' ? -result : result;
+            if (!result && key === 'fair') {
+                var am = sortValue(a, 'completeness'), bm = sortValue(b, 'completeness');
+                if (am != null && bm != null && am !== bm) result = bm - am;
+                else if (am != null && bm == null) result = -1;
+                else if (am == null && bm != null) result = 1;
+            }
+            return result || titleCompare(a,b);
         };
     }
     function setSort(key, dir) {
@@ -558,7 +576,7 @@
         document.getElementById('doi-only').setAttribute('aria-pressed', 'false');
         document.getElementById('fair-only').classList.remove('toggled');
         document.getElementById('fair-only').setAttribute('aria-pressed', 'false');
-        setSort('title', 'asc');
+        setSort('fair', 'desc');
         search.focus();
     });
     document.getElementById('export').addEventListener('click', function() {

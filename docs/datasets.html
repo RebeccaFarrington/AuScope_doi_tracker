@@ -23,29 +23,29 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #fffafd;
-            color: #3b1730;
+            background: #ffffff;
+            color: #0f172a;
             padding: 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
-        h1 { color: #e0218a; margin-bottom: 8px; font-size: 22px; }
-        .subtitle { color: #70435d; font-size: 13px; margin-bottom: 20px; }
-        .subtitle a { color: #e0218a; text-decoration: none; }
+        h1 { color: #2563eb; margin-bottom: 8px; font-size: 22px; }
+        .subtitle { color: #475569; font-size: 13px; margin-bottom: 20px; }
+        .subtitle a { color: #2563eb; text-decoration: none; }
         .subtitle a:hover { text-decoration: underline; }
 
         .intro {
-            color: #70435d;
+            color: #475569;
             font-size: 13px;
             line-height: 1.7;
             margin-bottom: 20px;
             max-width: 800px;
         }
 
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #f3c6dd; }
-        .tab { color: #70435d; padding: 8px 12px; text-decoration: none; border-bottom: 3px solid transparent; font-size: 13px; font-weight: 600; }
-        .tab.active { color: #e0218a; border-bottom-color: #e0218a; }
-        .tab:hover { color: #b5166d; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; }
+        .tab { color: #475569; padding: 8px 12px; text-decoration: none; border-bottom: 3px solid transparent; font-size: 13px; font-weight: 600; }
+        .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .tab:hover { color: #1d4ed8; }
 
         .platform-list {
             display: grid;
@@ -55,19 +55,21 @@
         }
         .platform-card {
             display: block;
-            border: 1px solid #f3c6dd;
-            background: #fff0f7;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
             border-radius: 8px;
             padding: 16px;
             text-decoration: none;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
         .platform-card:hover {
-            border-color: #e0218a;
+            border-color: #2563eb;
             box-shadow: 0 2px 8px rgba(224, 33, 138, 0.15);
         }
         .platform-card h3 { color: #d91b80; font-size: 15px; margin-bottom: 4px; }
-        .platform-card p { color: #70435d; font-size: 12px; }
+        .platform-card p { color: #475569; font-size: 12px; }
+        body::before { content:'DRAFT'; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) rotate(-24deg); color:rgba(37,99,235,.055); font-size:clamp(92px,18vw,260px); font-weight:800; letter-spacing:.12em; pointer-events:none; user-select:none; z-index:0; }
+        main { position:relative; z-index:1; }
 
         @media (max-width: 700px) {
             .platform-list { grid-template-columns: 1fr; }
@@ -80,8 +82,9 @@
     <p class="subtitle">Browse datasets across AuScope research infrastructure platforms</p>
 
     <nav class="tabs" aria-label="Dataset views">
-        <a class="tab active" href="datasets.html" aria-current="page">Platform trackers</a>
         <a class="tab" href="dataset-registry.html">Dataset Registry</a>
+        <a class="tab" href="fair-trends.html">F-UJI FAIR Trends</a>
+        <a class="tab active" href="datasets.html" aria-current="page">Platform Trackers</a>
         <a class="tab" href="project-mapping.html">Project Mapping</a>
         <a class="tab" href="software-registry.html">Software Registry</a>
     </nav>

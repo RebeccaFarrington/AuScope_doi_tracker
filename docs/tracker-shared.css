@@ -6,18 +6,18 @@
 */
 
 :root {
-    --bg: #fffafd;
-    --bg-soft: #fff0f7;
-    --bg-muted: #fde3f0;
-    --border: #f3c6dd;
-    --border-strong: #eaa4c8;
-    --text: #3b1730;
-    --text-soft: #70435d;
-    --text-muted: #a66f8d;
-    --accent: #e0218a;
-    --accent-strong: #b5166d;
-    --accent-soft: #f8badb;
-    --accent-bg: #fff0f8;
+    --bg: #ffffff;
+    --bg-soft: #f8fafc;
+    --bg-muted: #f1f5f9;
+    --border: #e5e7eb;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-soft: #475569;
+    --text-muted: #94a3b8;
+    --accent: #2563eb;
+    --accent-strong: #1d4ed8;
+    --accent-soft: #dbeafe;
+    --accent-bg: #eff6ff;
     --good: #16a34a;
     --good-bg: #dcfce7;
     --warn: #ca8a04;
@@ -41,6 +41,22 @@ body {
     font-size: 14px;
     line-height: 1.5;
 }
+body::before {
+    content: 'DRAFT';
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-24deg);
+    color: rgba(37, 99, 235, 0.055);
+    font-size: clamp(92px, 18vw, 260px);
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+}
+.wrap, .toast { position: relative; z-index: 1; }
 
 .wrap {
     max-width: 1400px;
