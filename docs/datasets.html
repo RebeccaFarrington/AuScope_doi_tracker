@@ -64,12 +64,12 @@
         }
         .platform-card:hover {
             border-color: #2563eb;
-            box-shadow: 0 2px 8px rgba(224, 33, 138, 0.15);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
         }
-        .platform-card h3 { color: #d91b80; font-size: 15px; margin-bottom: 4px; }
+        .platform-card h3 { color: #1d4ed8; font-size: 15px; margin-bottom: 4px; }
         .platform-card p { color: #475569; font-size: 12px; }
         body::before { content:'DRAFT'; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) rotate(-24deg); color:rgba(37,99,235,.055); font-size:clamp(92px,18vw,260px); font-weight:800; letter-spacing:.12em; pointer-events:none; user-select:none; z-index:0; }
-        main { position:relative; z-index:1; }
+        body > * { position:relative; z-index:1; }
 
         @media (max-width: 700px) {
             .platform-list { grid-template-columns: 1fr; }
