@@ -361,6 +361,7 @@ var SITE_TABS = [
     { id: 'publications', label: 'Publications', href: 'publications.html' },
     { id: 'datasets', label: 'Datasets', href: 'dataset-registry.html' },
     { id: 'fair', label: 'FAIR', href: 'fair-trends.html' },
+    { id: 'fair-summary', label: 'FAIR Summary', href: 'fair-summary.html' },
     { id: 'projects', label: 'Projects', href: 'project-mapping.html' },
     { id: 'software', label: 'Software', href: 'software-registry.html' }
 ];

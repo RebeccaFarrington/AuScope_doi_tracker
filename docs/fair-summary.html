@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<!--
+    AuScope FAIR Data Assessment
+    Overall and platform FAIR assessment scores and matched-DOI comparisons.
+    Features:
+      - Row 1 Traffic-Light Tiles: Total DOIs, Overall F-UJI, Findable, Accessible, Interoperable, Reusable
+      - Row 2 Traffic-Light Tiles: Platform Averages (EarthBank, AusPass, NCI, NVCL, AuScope Data Repository)
+      - Metrics on each tile: Score %, Score Delta (+/- vs 25 Aug 2026 baseline), DOI Delta (+/-), and Standard Deviation (σ)
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AuScope FAIR Data Assessment</title>
+    <link rel="stylesheet" href="tracker-shared.css">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --bg-soft: #f8fafc;
+            --bg-muted: #f1f5f9;
+            --border: #e2e8f0;
+            --border-strong: #cbd5e1;
+            --text: #0f172a;
+            --text-soft: #475569;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --accent-strong: #1d4ed8;
+            --accent-soft: #dbeafe;
+            --accent-bg: #eff6ff;
+            --tl-good: #16a34a;
+            --tl-good-bg: #f0fdf4;
+            --tl-good-border: #86efac;
+            --tl-good-text: #166534;
+            --tl-warn: #d97706;
+            --tl-warn-bg: #fffbeb;
+            --tl-warn-border: #fde68a;
+            --tl-warn-text: #92400e;
+            --tl-bad: #dc2626;
+            --tl-bad-bg: #fef2f2;
+            --tl-bad-border: #fca5a5;
+            --tl-bad-text: #991b1b;
+            --tl-neutral: #0284c7;
+            --tl-neutral-bg: #f0f9ff;
+            --tl-neutral-border: #bae6fd;
+            --tl-neutral-text: #0369a1;
+        }
+
+        body {
+            font-family: var(--sans);
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        .assessment-subtitle {
+            margin: 6px 0 8px;
+            font-weight: 600;
+            color: var(--text-soft);
+        }
+
+        .summary-lead {
+            color: var(--text-soft);
+            max-width: 95ch;
+            margin: 4px 0 20px;
+            line-height: 1.5;
+        }
+
+        /* ═══ Traffic Light Section Titles ═══ */
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin: 20px 0 10px;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+        .section-header h2, .section-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-header .baseline-info {
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+
+        /* Reuse the Dataset Registry's shared tile typography and spacing. */
+        .stats-row-1 { grid-template-columns: repeat(6, 1fr); }
+        .stats-row-2 { grid-template-columns: repeat(6, 1fr); }
+        .stat.fair-good { border-top: 3px solid var(--good); background: var(--good-bg); }
+        .stat.fair-warn { border-top: 3px solid var(--warn); background: var(--warn-bg); }
+        .stat.fair-bad { border-top: 3px solid var(--bad); background: var(--bad-bg); }
+        .stat.fair-good .value { color: var(--good); }
+        .stat.fair-warn .value { color: #a16207; }
+        .stat.fair-bad .value { color: var(--bad); }
+        .comparison-tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        .comparison-change { display: block; font-weight: 600; }
+        .comparison-change.up { color: var(--good-text); }
+        .comparison-change.down { color: var(--bad-text); }
+        .comparison-platform-tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        @media (max-width: 900px) { .comparison-platform-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 480px) { .comparison-platform-tiles { grid-template-columns: 1fr; } }
+        .comparison-note { font-size: 12px; color: var(--text-soft); line-height: 1.5; margin: 10px 0 16px; }
+        @media (max-width: 900px) { .comparison-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 480px) { .comparison-tiles { grid-template-columns: 1fr; } }
+        .tile-meta > div + div { margin-top: 2px; }
+        @media (max-width: 900px) {
+            .stats-row-1, .stats-row-2 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) {
+            .stats-row-1, .stats-row-2 { grid-template-columns: 1fr; }
+        }
+
+        .delta-chip {
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-variant-numeric: tabular-nums;
+            font-size: 10.5px;
+            display: inline-block;
+        }
+        .delta-chip.up { background: #dcfce7; color: #15803d; }
+        .delta-chip.down { background: #fee2e2; color: #b91c1c; }
+        .delta-chip.same { background: #f1f5f9; color: #64748b; }
+        .delta-chip.new { background: #eff6ff; color: #1d4ed8; font-size: 10px; }
+
+        /* ═══ Controls & Table from dataset-registry ═══ */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin: 18px 0 12px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            border-radius: 8px;
+        }
+        .controls input[type="search"] {
+            flex: 1 1 240px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+        .controls input[type="search"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+        }
+        .controls select {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #ffffff;
+            font-size: 12.5px;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .controls .btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .controls .btn:hover { background: var(--bg-soft); border-color: var(--border-strong); }
+        .controls .btn.active { background: var(--accent-bg); color: var(--accent-strong); border-color: var(--accent); }
+        .controls .btn.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+        .controls .btn.primary:hover { background: var(--accent-strong); }
+        .controls .spacer { flex: 1 1 auto; }
+        .controls .meta { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+        .table-wrap {
+            overflow: auto;
+            max-height: 70vh;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        table.data {
+            width: 100%;
+            min-width: 1350px;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        table.data thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #f8fafc;
+            color: var(--text-soft);
+            font-weight: 600;
+            font-size: 12px;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+            user-select: none;
+        }
+        table.data thead th.sortable { cursor: pointer; }
+        table.data thead th.sortable:hover { background: #f1f5f9; color: var(--text); }
+        table.data thead th .arrow { font-size: 10px; margin-left: 3px; color: var(--accent); }
+
+        table.data tbody tr.registry-row {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.12s;
+            cursor: pointer;
+        }
+        table.data tbody tr.registry-row:hover { background: var(--accent-bg); }
+        table.data tbody tr.registry-row.expanded { background: var(--accent-bg); }
+        table.data tbody td { padding: 9px 12px; vertical-align: middle; }
+
+        .title-link {
+            color: var(--text);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            text-align: left;
+            font: inherit;
+        }
+        .title-link:hover { color: var(--accent); text-decoration: underline; }
+
+        .badge-new {
+            font-size: 10px;
+            font-weight: 700;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            padding: 1px 5px;
+            border-radius: 10px;
+            white-space: nowrap;
+            margin-left: 5px;
+        }
+        .platform-badge {
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .type-badge {
+            background: var(--bg-muted);
+            color: var(--text-soft);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 90px;
+        }
+        .score-bar .track {
+            width: 48px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .score-bar .fill { height: 100%; border-radius: 4px; }
+        .score-bar .fill.good { background: var(--tl-good); }
+        .score-bar .fill.warn { background: var(--tl-warn); }
+        .score-bar .fill.bad  { background: var(--tl-bad); }
+
+        .doi-delta {
+            font-size: 10.5px;
+            margin-left: 4px;
+        }
+
+        /* Detail Drawer inside row */
+        .detail-row td {
+            padding: 0 !important;
+            background: #f8fafc;
+        }
+        .detail {
+            padding: 16px 20px;
+            border-bottom: 2px solid var(--accent);
+        }
+        .detail-tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 14px;
+        }
+        .detail-tab {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            background: none;
+            color: var(--text-soft);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+        .detail-tab:hover { color: var(--accent); }
+        .detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .detail-pane { display: none; }
+        .detail-pane.active { display: block; }
+
+        .ov-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 6px 16px;
+            font-size: 12.5px;
+        }
+        .ov-grid dt { font-weight: 600; color: var(--text-soft); }
+        .ov-grid dd { margin: 0; }
+
+        .fuji-delta-box {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .fuji-delta-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        .fuji-delta-table th, .fuji-delta-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: left;
+        }
+        .fuji-delta-table th { background: #f8fafc; color: var(--text-soft); font-weight: 600; }
+
+        .checks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .check-pill {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 11.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .check-status {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        .check-status.pass { background: #dcfce7; color: #15803d; }
+        .check-status.fail { background: #f1f5f9; color: #64748b; }
+        .check-code { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
+        .check-name { font-weight: 500; }
+        .check-pts { margin-left: auto; font-weight: 600; color: var(--accent); }
+
+        .loading-state, .empty-state { text-align: center; padding: 36px; color: var(--text-soft); }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .raw-json {
+            font-family: var(--mono);
+            font-size: 11px;
+            background: var(--bg-muted);
+            padding: 12px;
+            border-radius: 6px;
+            overflow: auto;
+            max-height: 350px;
+        }
+        .orcid-icon { width: 13px; height: 13px; vertical-align: middle; margin-left: 2px; }
+        /* Readable summary typography; keep six columns on desktop. */
+        body[data-site-tab="fair-summary"] .brand h1 { font-size: 30px; line-height: 1.25; }
+        .brand .assessment-subtitle { font-size: 20px; line-height: 1.5; }
+        .brand .summary-lead { font-size: 18px; line-height: 1.6; }
+        .section-header { flex-wrap: wrap; }
+        .section-header h2, .section-header h3 { font-size: 22px; line-height: 1.35; }
+        .section-header .baseline-info { font-size: 16px; }
+        .stats-row-1, .stats-row-2 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        .stat { min-width: 0; padding: 14px 12px; }
+        .stat .label { font-size: 15px; line-height: 1.4; letter-spacing: 0.025em; overflow-wrap: anywhere; }
+        .stat .value { font-size: 30px; line-height: 1.25; margin: 6px 0; }
+        .stat .sub { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+        .delta-chip, .delta-chip.new { font-size: 15px; }
+        .comparison-note { font-size: 18px; line-height: 1.65; }
+        .topbar .links, .foot { font-size: 16px; }
+        @media (max-width: 900px) {
+            .stats-row-1, .stats-row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 480px) {
+            .stats-row-1, .stats-row-2 { grid-template-columns: 1fr; }
+        }
+        .comparison-accordion { margin: 20px 0; }
+        .comparison-accordion > summary { font-size: 22px; font-weight: 600; line-height: 1.35; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .comparison-accordion[open] > summary { margin-bottom: 12px; }
+        .maturity-controls { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:16px 0; font-size:18px; }
+        .maturity-controls select { max-width:100%; font:inherit; padding:8px; border:1px solid var(--border-strong); border-radius:6px; background:var(--bg); color:var(--text); }
+        .maturity-legend { display:flex; flex-wrap:wrap; gap:12px 20px; font-size:16px; margin:12px 0; }
+        .maturity-key { display:inline-block; width:14px; height:14px; margin-right:6px; vertical-align:middle; }
+        .maturity-0 { background:#dbe3ed; color:#0f172a; }
+        .maturity-1 { background:#c4b5fd; color:#0f172a; }
+        .maturity-2 { background:#7dd3fc; color:#0f172a; }
+        .maturity-3 { background:#1e40af; color:#fff; }
+        .maturity-4 { background:repeating-linear-gradient(45deg,#fff,#fff 4px,#cbd5e1 4px,#cbd5e1 6px); color:#0f172a; }
+        .maturity-principle { margin:20px 0; border-bottom:1px solid var(--border); padding-bottom:16px; }
+        .maturity-principle > summary { font-size:22px; font-weight:600; cursor:pointer; padding:8px 0; }
+        .maturity-metric { margin:20px 0; }
+        .maturity-metric h3 { font-size:18px; font-weight:600; line-height:1.45; margin-bottom:8px; }
+        .maturity-bar { display:flex; height:32px; width:100%; overflow:hidden; border:1px solid var(--border-strong); border-radius:4px; }
+        .maturity-segment { display:flex; align-items:center; justify-content:center; min-width:0; font-size:14px; }
+        .maturity-counts { font-size:16px; line-height:1.6; margin-top:8px; }
+        .maturity-description { font-size:16px; line-height:1.6; margin:8px 0; }
+        .maturity-description summary { cursor:pointer; }
+        /* Hierarchy for the nested score explanations. */
+        section[aria-labelledby="understanding-heading"] { margin-top: 36px; }
+        #understanding-heading { font-size: 26px; font-weight: 700; }
+        .comparison-accordion > summary { font-size: 22px; font-weight: 600; }
+        .comparison-accordion[open] { padding-left: 18px; border-left: 2px solid var(--border); }
+        .comparison-accordion[open] > summary { margin-left: -18px; padding-left: 16px; }
+        .maturity-principle { margin-left: 12px; }
+        .maturity-principle > summary { font-size: 20px; font-weight: 600; }
+        .maturity-principle[open] { padding-left: 14px; border-left: 2px solid var(--border); }
+        .maturity-principle[open] > summary { margin-left: -14px; padding-left: 12px; }
+        .maturity-metric h3 { font-size: 18px; font-weight: 600; }
+        .maturity-description, .maturity-counts { font-size: 18px; }
+        @media (max-width: 480px) {
+            .comparison-accordion[open] { padding-left: 10px; }
+            .comparison-accordion[open] > summary { margin-left: -10px; padding-left: 8px; }
+            .maturity-principle { margin-left: 4px; }
+        }
+        .maturity-axis, .maturity-chart-row { display:grid; grid-template-columns: minmax(200px, 30%) minmax(0, 1fr); gap:6px 20px; align-items:center; }
+        .maturity-axis { font-size:14px; color:var(--text-soft); margin:20px 0 12px; }
+        .maturity-axis > div { display:flex; justify-content:space-between; }
+        .maturity-chart-group { margin:20px 0 28px; }
+        .maturity-chart-group > h3 { font-size:20px; margin:0 0 14px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+        .maturity-chart-row { margin:0 0 14px; }
+        .maturity-row-label { font-size:18px; line-height:1.35; }
+        .maturity-chart-row .maturity-bar { height:30px; }
+        .maturity-row-detail { grid-column:2; font-size:14px; line-height:1.6; color:var(--text-soft); }
+        .maturity-row-detail summary { cursor:pointer; width:fit-content; }
+        .maturity-row-detail p { margin:8px 0; }
+        @media (max-width:600px) {
+            .maturity-axis { grid-template-columns:1fr; }
+            .maturity-chart-row { grid-template-columns:1fr; }
+            .maturity-row-detail { grid-column:1; }
+        }
+    </style>
+</head>
+<body data-site-tab="fair-summary">
+<main class="wrap">
+
+    <header class="topbar">
+        <div class="brand">
+            <h1>
+                <img src="assets/auscope-logo.png" class="auscope-logo" alt="AuScope" data-fallback="auscope">
+                <span>AuScope <span class="accent">FAIR</span> Data Assessment</span>
+            </h1>
+            <p class="assessment-subtitle" id="assessment-subtitle" aria-live="polite"></p>
+            <p class="summary-lead">This page summarises automated <a href="https://www.f-uji.net/" target="_blank" rel="noopener">F-UJI</a> scores for AuScope datasets identified by their Digital Object Identifiers (DOIs), providing a quantified and operationalised indication of their alignment with the Findable, Accessible, Interoperable and Reusable (FAIR) principles.</p>
+            <p class="summary-lead">Score colours use rounded percentages: green &ge;60%, amber 40&ndash;59%, red &lt;40%. These are dashboard thresholds, not F-UJI benchmarks. Assessment coverage uses a separate scale: green &ge;80%, amber 50&ndash;79%, red &lt;50%.</p>
+        </div>
+        <div class="links">
+            <a href="fair-trends.html">FAIR Trends &rarr;</a>
+            <a href="dataset-registry.html">Dataset Registry &rarr;</a>
+        </div>
+    </header>
+
+    <!-- ═══ ROW 1: OVERALL BENCHMARKS ═══ -->
+    <div class="section-header">
+        <h2>All Dataset registry DOIs</h2>
+        <span class="baseline-info">Baseline: <strong>25 Aug 2026</strong> &middot; Metrics pinned to F-UJI v0.8</span>
+    </div>
+
+    <section class="stats stats-row-1" aria-label="Overall FAIR Traffic Light Tiles">
+        <!-- 2. Total F-UJI FAIR Score -->
+        <div class="stat" id="tile-fair">
+            <div class="label">
+                <span class="tile-title">Total F-UJI FAIR Score</span>
+            </div>
+            <div class="value" id="tl-fair-val">&mdash;</div>
+            <div class="sub tile-meta">
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">&plusmn; from 25/8:</span>
+                    <span class="delta-chip" id="tl-fair-delta">&mdash;</span>
+                </div>
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">Std Dev (&sigma;):</span>
+                    <span id="tl-fair-std">&mdash;</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Findable (F) -->
+        <div class="stat" id="tile-f">
+            <div class="label">
+                <span class="tile-title">Findable (F)</span>
+            </div>
+            <div class="value" id="tl-f-val">&mdash;</div>
+            <div class="sub tile-meta">
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">&plusmn; from 25/8:</span>
+                    <span class="delta-chip" id="tl-f-delta">&mdash;</span>
+                </div>
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">Std Dev (&sigma;):</span>
+                    <span id="tl-f-std">&mdash;</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Accessible (A) -->
+        <div class="stat" id="tile-a">
+            <div class="label">
+                <span class="tile-title">Accessible (A)</span>
+            </div>
+            <div class="value" id="tl-a-val">&mdash;</div>
+            <div class="sub tile-meta">
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">&plusmn; from 25/8:</span>
+                    <span class="delta-chip" id="tl-a-delta">&mdash;</span>
+                </div>
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">Std Dev (&sigma;):</span>
+                    <span id="tl-a-std">&mdash;</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Interoperable (I) -->
+        <div class="stat" id="tile-i">
+            <div class="label">
+                <span class="tile-title">Interoperable (I)</span>
+            </div>
+            <div class="value" id="tl-i-val">&mdash;</div>
+            <div class="sub tile-meta">
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">&plusmn; from 25/8:</span>
+                    <span class="delta-chip" id="tl-i-delta">&mdash;</span>
+                </div>
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">Std Dev (&sigma;):</span>
+                    <span id="tl-i-std">&mdash;</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Reusable (R) -->
+        <div class="stat" id="tile-r">
+            <div class="label">
+                <span class="tile-title">Reusable (R)</span>
+            </div>
+            <div class="value" id="tl-r-val">&mdash;</div>
+            <div class="sub tile-meta">
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">&plusmn; from 25/8:</span>
+                    <span class="delta-chip" id="tl-r-delta">&mdash;</span>
+                </div>
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">Std Dev (&sigma;):</span>
+                    <span id="tl-r-std">&mdash;</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. Total DOIs -->
+        <div class="stat" id="tile-total">
+            <div class="label">
+                <span class="tile-title">Total Assessed DOIs</span>
+            </div>
+            <div class="value" id="tl-total-val">&mdash;</div>
+            <div class="sub tile-meta">
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">&plusmn; from 25/8:</span>
+                    <span class="delta-chip" id="tl-total-delta">&mdash;</span>
+                </div>
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">Total in catalogue:</span>
+                    <span id="tl-total-all">&mdash;</span>
+                </div>
+                <div class="tl-meta-item">
+                    <span class="tl-meta-label">Assessment coverage:</span>
+                    <span id="tl-total-coverage">&mdash;</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <p class="comparison-note" id="all-datasets-highlight"></p>
+    <p class="comparison-note" id="all-datasets-lowlight"></p>
+
+    <!-- ═══ ROW 2: PLATFORM BREAKDOWN ═══ -->
+    <div class="section-header">
+        <h2>Dataset registry DOIs by Platform</h2>
+    </div>
+
+    <section class="stats stats-row-2" id="platform-tiles-container" aria-label="Platform FAIR Traffic Light Tiles">
+        <!-- Rendered dynamically via JavaScript -->
+        <div class="stat"><div class="loading-state"><span class="spinner"></span> Loading platform metrics&hellip;</div></div>
+    </section>
+
+    <div id="platform-highlights" aria-label="Platform highlights and lowlights"></div>
+
+    <section aria-labelledby="understanding-heading">
+        <div class="section-header"><h2 id="understanding-heading">Understanding the scores</h2></div>
+
+    <details class="comparison-accordion" aria-labelledby="comparison-heading">
+        <summary id="comparison-heading">Change since August 2026 — Excluding new DOIs</summary>
+        <p class="comparison-note" id="comparison-cohort">Loading matched assessments&hellip;</p>
+        <div class="stats comparison-tiles" id="comparison-tiles"></div>
+        <div class="section-header"><h3>By Platform — Excluding new DOIs</h3></div>
+        <div class="stats comparison-platform-tiles" id="comparison-platforms" aria-label="Platform scores excluding new DOIs"></div>
+        <p class="comparison-note" id="comparison-outcomes"></p>
+        <p class="comparison-note"><strong>Highlight — Findability, persistent identifiers:</strong> All 47 datasets with improved overall scores were from EarthBank, each gaining credit for persistent identifier recognition. Some also gained credit on other checks.</p>
+        <p class="comparison-note"><strong>Lowlight — Reusability, description of data content:</strong> Of the 79 datasets with lower overall scores, 66 AusPASS and 12 EarthBank datasets received fewer points for metadata describing the data’s content, despite still passing that check. The remaining AusPASS dataset lost credit for structured metadata under Interoperability. Different F-UJI software versions were used, so these changes require investigation before being interpreted as reduced data quality or reusability.</p>
+        <p class="comparison-note">Changes are calculated before rounding. Score changes may reflect metadata or assessment behaviour.</p>
+    </details>
+
+    <details class="comparison-accordion" aria-labelledby="maturity-heading">
+        <summary id="maturity-heading">F-UJI maturity levels</summary>
+        <p class="comparison-note">This chart shows all 17 F-UJI assessment metrics together, grouped by FAIR principle. Each bar shows the distribution of maturity levels across the selected datasets. Maturity comes directly from F-UJI’s test outcomes; it is not calculated from our percentage-score colour thresholds.</p>
+        <p class="comparison-note">F-UJI defines four levels: <strong>0 Incomplete, 1 Initial, 2 Moderate and 3 Advanced</strong>. A metric’s maturity is the highest level associated with a passed test. References: <a href="https://github.com/pangaea-data-publisher/fuji/blob/master/simpleclient/index.php" target="_blank" rel="noopener">F-UJI maturity labels</a> and <a href="https://github.com/pangaea-data-publisher/fuji#adding-support-for-new-metrics" target="_blank" rel="noopener">maturity calculation</a>. The blue and purple palette below distinguishes these levels from the dashboard’s score indicators.</p>
+        <div class="maturity-controls"><label for="maturity-platform">Platform</label><select id="maturity-platform"><option value="">All platforms</option></select></div>
+        <p class="comparison-note" id="maturity-cohort" aria-live="polite"></p>
+        <div class="maturity-legend" aria-label="F-UJI maturity legend">
+            <span><span class="maturity-key maturity-0"></span>0 Incomplete</span>
+            <span><span class="maturity-key maturity-1"></span>1 Initial</span>
+            <span><span class="maturity-key maturity-2"></span>2 Moderate</span>
+            <span><span class="maturity-key maturity-3"></span>3 Advanced</span>
+            <span><span class="maturity-key maturity-4"></span>Unavailable</span>
+        </div>
+        <div id="maturity-principles"></div>
+        <p class="comparison-note">Unavailable means no valid metric maturity result was stored; it is not classified as Incomplete. Results describe evidence detected by the automated assessment. Principle descriptions are paraphrased from <a href="https://www.nature.com/articles/sdata201618" target="_blank" rel="noopener">Wilkinson et al. (2016)</a>; test descriptions follow the <a href="https://doi.org/10.5281/zenodo.15045911" target="_blank" rel="noopener">FAIRsFAIR assessment metrics v0.8</a>. These are metric-level results; underlying subtest details are not retained in this dashboard.</p>
+    </details>
+
+    </section>
+
+    <p class="foot">
+        FAIR Assessment: <strong>F-UJI Automated FAIR Assessment Tool</strong> (metric set v0.8) &middot;
+        Baseline comparison: <strong>25 August 2026</strong> &middot;
+        Full catalogue from <a href="dataset-registry.html">AuScope Dataset Registry</a>.
+    </p>
+</main>
+
+<script src="tracker-chassis.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    var records = [];
+    var fairScores = {}, fairMetadata = {}, baselineData = {};
+
+    // ═══ Helper: Standard Deviation & Stats ═══
+    function computeStats(arr) {
+        if (!arr || !arr.length) return { n: 0, avg: null, std: null };
+        var sum = 0;
+        for (var i = 0; i < arr.length; i++) sum += arr[i];
+        var avg = sum / arr.length;
+        var sqDiffs = 0;
+        for (var j = 0; j < arr.length; j++) sqDiffs += Math.pow(arr[j] - avg, 2);
+        var std = Math.sqrt(sqDiffs / arr.length);
+        return {
+            n: arr.length,
+            avg: Math.round(avg * 10) / 10,
+            std: Math.round(std * 10) / 10
+        };
+    }
+
+    function normaliseDoi(d) {
+        if (!d) return '';
+        return String(d).toLowerCase().replace(/^https?:\/\/doi\.org\//, '').trim();
+    }
+
+    function platformName(platform) {
+        if (platform === 'EarthBank') return 'EarthBank Geochemistry and Geochronology';
+        if (platform === 'AusPass' || platform === 'AusPASS') return 'AusPASS Passive Seismic Server';
+        if (platform === 'NCI') return 'National Computational Infrastructure';
+        if (platform === 'NVCL') return 'National Virtual Core Library';
+        return platform || 'Other';
+    }
+
+    // ═══ Traffic Light Tier ═══
+    function getTrafficLight(score) {
+        if (score == null || isNaN(score)) return { cls: 'neutral', label: 'Unassessed' };
+        score = Math.round(Number(score));
+        if (score >= 60) return { cls: 'good', label: 'Good (\u226560%)' };
+        if (score >= 40) return { cls: 'warn', label: 'Partial (40\u201359%)' };
+        return { cls: 'bad', label: 'Action Needed (<40%)' };
+    }
+
+    function formatDeltaChip(delta, unit) {
+        if (delta == null || isNaN(delta)) return '<span class="delta-chip same">&mdash;</span>';
+        delta = Math.round(Number(delta));
+        var sign = delta > 0 ? '+' : '';
+        var cls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'same';
+        var arrow = delta > 0 ? '&uarr; ' : delta < 0 ? '&darr; ' : '';
+        return '<span class="delta-chip ' + cls + '">' + arrow + sign + delta + (unit || '') + '</span>';
+    }
+
+    function setDeltaElement(el, delta, unit) {
+        if (!el) return;
+        if (delta == null || isNaN(delta)) {
+            el.className = 'delta-chip same';
+            el.innerHTML = '&mdash;';
+            return;
+        }
+        delta = Math.round(Number(delta));
+        var sign = delta > 0 ? '+' : '';
+        var cls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'same';
+        var arrow = delta > 0 ? '&uarr; ' : delta < 0 ? '&darr; ' : '';
+        el.className = 'delta-chip ' + cls;
+        el.innerHTML = arrow + sign + delta + (unit || '');
+    }
+
+    // ═══ Load Feeds ═══
+    Promise.all([
+        fetch('datasets-data.json').then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+        fetch('fair-scores.json').then(function(r) { return r.ok ? r.json() : { scores:{} }; }).catch(function() { return { scores:{} }; }),
+        fetch('fair-baseline.json').then(function(r) { return r.ok ? r.json() : { records:{} }; }).catch(function() { return { records:{} }; })
+    ]).then(function(feeds) {
+        var data = feeds[0];
+        fairMetadata = feeds[1] || {};
+        fairScores = fairMetadata.scores || {};
+        var assessmentDates = Object.keys(fairScores).map(function(doi) {
+            return fairScores[doi].d;
+        }).filter(function(date) { return /^\d{4}-\d{2}-\d{2}$/.test(date || ''); }).sort();
+        var latestAssessment = assessmentDates.length ? assessmentDates[assessmentDates.length - 1] : fairMetadata.generated;
+        var assessmentDate = latestAssessment ? new Date(latestAssessment) : null;
+        if (assessmentDate && !isNaN(assessmentDate.getTime())) {
+            var dateLabel = assessmentDate.toLocaleDateString('en-AU', {
+                month: 'long', year: 'numeric', timeZone: 'UTC'
+            });
+            document.getElementById('assessment-subtitle').textContent = dateLabel;
+        }
+
+        baselineData = feeds[2] || { records:{} };
+
+        records = (data.records || []).map(function(r) {
+            var norm = normaliseDoi(r.doi);
+            var fair = fairScores[norm];
+            r.fair = (fair && fair.s != null) ? Number(fair.s) : null;
+            r.fairF = (fair && fair.f != null) ? Number(fair.f) : null;
+            r.fairA = (fair && fair.a != null) ? Number(fair.a) : null;
+            r.fairI = (fair && fair.i != null) ? Number(fair.i) : null;
+            r.fairR = (fair && fair.r != null) ? Number(fair.r) : null;
+            r.fairChecks = (fair && fair.checks) ? fair.checks : [];
+            
+            return r;
+        });
+
+
+        renderTrafficLightTiles();
+        renderMatchedComparison();
+        var maturityPlatforms = Array.from(new Set(records.map(function(record) { return record.platform || 'Other'; }))).sort();
+        var maturitySelect = document.getElementById('maturity-platform');
+        maturityPlatforms.forEach(function(platform) {
+            var option = document.createElement('option');
+            option.value = platform;
+            option.textContent = platformName(platform);
+            maturitySelect.appendChild(option);
+        });
+        maturitySelect.addEventListener('change', renderMaturity);
+        renderMaturity();
+    }).catch(function(err) {
+        console.error('Failed to load datasets:', err);
+        document.getElementById('comparison-cohort').textContent = 'Failed to load assessment data: ' + err.message;
+    });
+
+    // ═══ Populate Traffic Light Tiles ═══
+    function renderTrafficLightTiles() {
+        // Collect current values
+        var curS = [], curF = [], curA = [], curI = [], curR = [];
+        var curPlat = {};
+
+        records.forEach(function(r) {
+            var p = r.platform || 'Other';
+            if (!curPlat[p]) curPlat[p] = { all: 0, s: [] };
+            curPlat[p].all++;
+
+            if (r.fair != null) {
+                curS.push(r.fair);
+                curPlat[p].s.push(r.fair);
+                if (r.fairF != null) curF.push(r.fairF);
+                if (r.fairA != null) curA.push(r.fairA);
+                if (r.fairI != null) curI.push(r.fairI);
+                if (r.fairR != null) curR.push(r.fairR);
+            }
+        });
+
+        var stS = computeStats(curS);
+        var stF = computeStats(curF);
+        var stA = computeStats(curA);
+        var stI = computeStats(curI);
+        var stR = computeStats(curR);
+
+        // Baseline stats (from fair-baseline.json if available, or fallback)
+        var bTotal = baselineData.assessed || 167;
+        var bOverall = baselineData.overall || { avg: 50.1, std: 6.6 };
+        var bF = baselineData.f || { avg: 57.0, std: 15.2 };
+        var bA = baselineData.a || { avg: 44.6, std: 4.6 };
+        var bI = baselineData.i || { avg: 36.1, std: 9.3 };
+        var bR = baselineData.r || { avg: 62.6, std: 11.6 };
+        var bPlat = baselineData.platforms || {};
+
+        // --- ROW 1: Overall Tiles ---
+        // 1. Total DOIs
+        var elTotalVal = document.getElementById('tl-total-val');
+        if (elTotalVal) elTotalVal.textContent = stS.n.toLocaleString('en-AU');
+        var dTotal = stS.n - bTotal;
+        setDeltaElement(document.getElementById('tl-total-delta'), dTotal > 0 ? '+' + dTotal : dTotal, ' DOIs');
+        var elTotalAll = document.getElementById('tl-total-all');
+        if (elTotalAll) elTotalAll.textContent = records.length.toLocaleString('en-AU') + ' total datasets';
+        var coverage = records.length ? stS.n / records.length * 100 : null;
+        var totalTile = document.getElementById('tile-total');
+        totalTile.className = 'stat' + (coverage == null ? '' : Math.round(coverage) >= 80 ? ' fair-good' : Math.round(coverage) >= 50 ? ' fair-warn' : ' fair-bad');
+        totalTile.title = 'Assessment coverage: green ≥80%, amber 50–79%, red <50% of catalogue datasets.';
+        document.getElementById('tl-total-coverage').textContent = coverage == null ? '\u2014' : coverage.toFixed(0) + '%';
+
+
+
+        // 2. Total F-UJI FAIR Score
+        setupScoreTile('fair', stS, bOverall);
+
+        // 3. Findable (F)
+        setupScoreTile('f', stF, bF);
+
+        // 4. Accessible (A)
+        setupScoreTile('a', stA, bA);
+
+        // 5. Interoperable (I)
+        setupScoreTile('i', stI, bI);
+
+        // 6. Reusable (R)
+        setupScoreTile('r', stR, bR);
+
+        var physicalSamples = records.filter(function(record) { return record.type === 'PhysicalObject'; }).length;
+        var withoutDoi = records.filter(function(record) { return !normaliseDoi(record.doi) && record.type !== 'PhysicalObject'; }).length;
+        document.getElementById('all-datasets-highlight').innerHTML = '<strong>Highlight — Assessment coverage:</strong> '
+            + (coverage == null ? 'No catalogue records are available for assessment.'
+                : stS.n + ' of ' + records.length + ' catalogue records have F-UJI assessments (' + Math.round(coverage)
+                    + '% coverage, as shown in the tile). The catalogue includes ' + physicalSamples
+                    + ' physical samples and ' + withoutDoi + ' records without DOIs, which are excluded from assessment.');
+        document.getElementById('all-datasets-lowlight').innerHTML = '<strong>Lowlight — Interoperability, vocabularies and related resources:</strong> '
+            + (stI.avg != null ? 'Interoperability averages ' + Math.round(stI.avg) + '%.' : 'No interoperability scores are available.');
+        function interoperabilityChecks(metric) {
+            return records.filter(function(record) { return record.fair != null; }).map(function(record) {
+                return (record.fairChecks || []).find(function(check) { return check[0] === metric; });
+            }).filter(Boolean);
+        }
+        var vocabChecks = interoperabilityChecks('FsF-I2-01M');
+        var linkChecks = interoperabilityChecks('FsF-I3-01M');
+        if (vocabChecks.length && linkChecks.length) {
+            var vocabPass = vocabChecks.filter(function(check) { return check[3] === 'pass'; }).length;
+            var linkPass = linkChecks.filter(function(check) { return check[3] === 'pass'; }).length;
+            document.getElementById('all-datasets-lowlight').innerHTML += ' '
+                + vocabPass + ' of ' + vocabChecks.length + ' assessed records passed the registered-vocabulary check, and only '
+                + linkPass + ' of ' + linkChecks.length + ' passed the check for qualified links to related resources. '
+                + 'These results reflect evidence detected by F-UJI, rather than proving that vocabularies or relationships are absent.';
+        }
+
+
+
+        // --- ROW 2: Platform Breakdown Tiles ---
+        var platContainer = document.getElementById('platform-tiles-container');
+        var platKeys = Object.keys(curPlat).sort(function(a, b) {
+            return curPlat[b].s.length - curPlat[a].s.length;
+        });
+
+        var platHtml = '';
+        // Include the dataset-weighted overall average alongside platform averages.
+        [null].concat(platKeys).forEach(function(platform) {
+            var pName = platform === null ? 'Total F-UJI FAIR Score' : platformName(platform);
+            var data = platform === null ? { all: records.length, s: curS } : curPlat[platform];
+            var pStats = computeStats(data.s);
+            var bp = platform === null ? { avg: bOverall.avg, n: bTotal } : (bPlat[platform] || null);
+
+            var dScore = (pStats.avg != null && bp && bp.avg != null) ? Math.round((pStats.avg - bp.avg) * 10) / 10 : null;
+            var dDoi = bp ? (pStats.n - bp.n) : pStats.n;
+
+            var tl = getTrafficLight(pStats.avg);
+
+            platHtml += '<div class="stat fair-' + tl.cls + '">';
+            platHtml += '  <div class="label">';
+            platHtml += '    <span class="tile-title" title="' + escapeAttr(pName) + '">' + escapeHtml(pName) + '</span>';
+            platHtml += '';
+            platHtml += '  </div>';
+            platHtml += '  <div class="value">' + (pStats.avg != null ? Math.round(pStats.avg) + '%' : '&mdash;') + '</div>';
+            platHtml += '';
+            platHtml += '  <div class="sub tile-meta">';
+            platHtml += '    <div class="tl-meta-item">';
+            platHtml += '      <span class="tl-meta-label">&plusmn; score vs 25/8:</span>';
+            if (bp) {
+                platHtml += formatDeltaChip(dScore != null ? (dScore > 0 ? '+' + dScore : dScore) : null, '%');
+            } else {
+                platHtml += '<span>- (new)</span>';
+            }
+            platHtml += '    </div>';
+            platHtml += '    <div class="tl-meta-item">';
+            platHtml += '      <span class="tl-meta-label">Assessed DOIs:</span>';
+            platHtml += '      <span><strong>' + pStats.n + '</strong> ' + (bp ? formatDeltaChip(dDoi > 0 ? '+' + dDoi : dDoi) : '<span>- (new)</span>') + '</span>';
+            platHtml += '    </div>';
+            platHtml += '    <div class="tl-meta-item">';
+            platHtml += '      <span class="tl-meta-label">Std Dev (&sigma;):</span>';
+            platHtml += '      <span>' + (pStats.std != null ? '&plusmn;' + Math.round(pStats.std) + '%' : '&mdash;') + '</span>';
+            platHtml += '    </div>';
+            platHtml += '  </div>';
+            platHtml += '</div>';
+        });
+
+        platContainer.innerHTML = platHtml;
+        var structureChecks = interoperabilityChecks('FsF-I1-01M');
+        var structureFull = structureChecks.filter(function(check) { return check[1] === check[2]; }).length;
+        var platformCount = platKeys.filter(function(platform) { return curPlat[platform].s.length > 0; }).length;
+        var nciLicenseChecks = [];
+        records.filter(function(record) { return record.platform === 'NCI' && record.fair != null; }).forEach(function(record) {
+            (record.fairChecks || []).forEach(function(check) { if (check[0] === 'FsF-R1.1-01M') nciLicenseChecks.push(check); });
+        });
+        var nciLicensePass = nciLicenseChecks.filter(function(check) { return check[3] === 'pass'; }).length;
+        document.getElementById('platform-highlights').innerHTML = '<p class="comparison-note"><strong>Highlight — Interoperability, structured metadata:</strong> '
+            + (structureChecks.length ? 'Across ' + platformCount + ' platforms, ' + structureFull + ' of ' + structureChecks.length
+                + ' assessed datasets received full credit for machine-readable metadata. This provides a strong foundation, although gaps in recognised vocabularies and links to related resources limit the overall interoperability score to '
+                + Math.round(stI.avg) + '%.' : 'No structured-metadata checks are available.')
+            + '</p><p class="comparison-note"><strong>Lowlight / action — Reusability, licence information:</strong> '
+            + (nciLicenseChecks.length ? 'Licence information is present in the National Computational Infrastructure catalogue, but F-UJI detected it in only '
+                + nciLicensePass + ' of ' + nciLicenseChecks.length + ' assessed records. Investigate how licences are exposed in machine-readable metadata and why F-UJI is not recognising them.'
+                : 'No National Computational Infrastructure licence checks are available.') + '</p>';
+
+    }
+
+    function setupScoreTile(id, current, baseline) {
+        var tile = document.getElementById('tile-' + id);
+        var valEl = document.getElementById('tl-' + id + '-val');
+        var deltaEl = document.getElementById('tl-' + id + '-delta');
+        var stdEl = document.getElementById('tl-' + id + '-std');
+
+        if (!tile || !valEl || !deltaEl || !stdEl) {
+            console.warn('Missing element for score tile:', id);
+            return;
+        }
+
+        var tl = getTrafficLight(current.avg);
+        tile.className = 'stat fair-' + tl.cls;
+
+        valEl.textContent = current.avg != null ? Math.round(current.avg) + '%' : '\u2014';
+
+        var d = (current.avg != null && baseline && baseline.avg != null) ? Math.round((current.avg - baseline.avg) * 10) / 10 : null;
+        setDeltaElement(deltaEl, d != null ? (d > 0 ? '+' + d : d) : null, '%');
+        stdEl.innerHTML = current.std != null ? '&plusmn;' + Math.round(current.std) + '%' : '&mdash;';
+    }
+
+    function renderMatchedComparison() {
+        var base = baselineData.records || {};
+        var shared = Object.keys(base).filter(function(doi) {
+            return base[doi].s != null && fairScores[doi] && fairScores[doi].s != null;
+        });
+        var excluded = Object.keys(base).filter(function(doi) { return base[doi].s != null; }).length - shared.length;
+        document.getElementById('comparison-cohort').textContent = shared.length
+            ? shared.length + ' DOIs assessed in both August 2026 and the current assessment. New DOIs excluded.'
+            : 'No matched assessment scores available.';
+        function summary(dois, key) {
+            var matched = dois.filter(function(doi) { return base[doi][key] != null && fairScores[doi][key] != null; });
+            if (!matched.length) return null;
+            var before = 0, after = 0;
+            matched.forEach(function(doi) { before += Number(base[doi][key]); after += Number(fairScores[doi][key]); });
+            return { before: before / matched.length, after: after / matched.length, n: matched.length };
+        }
+        function change(stats) {
+            var delta = Math.round(stats.after - stats.before);
+            return '<span class="comparison-change ' + (delta > 0 ? 'up' : delta < 0 ? 'down' : '') + '">'
+                + (delta > 0 ? '+' : '') + String(delta === 0 ? 0 : delta) + '</span>';
+        }
+        var pillars = [['s', 'Total F-UJI FAIR Score'], ['f', 'Findable (F)'], ['a', 'Accessible (A)'], ['i', 'Interoperable (I)'], ['r', 'Reusable (R)']];
+        document.getElementById('comparison-tiles').innerHTML = pillars.map(function(pillar) {
+            var stats = summary(shared, pillar[0]);
+            return '<div class="stat"><div class="label">' + pillar[1] + '</div><div class="value">'
+                + (stats ? stats.after.toFixed(0) + '%' : '&mdash;') + '</div><div class="sub">'
+                + (stats ? 'August: ' + stats.before.toFixed(0) + '%' + change(stats) + 'percentage points' : 'No matched scores')
+                + '</div></div>';
+        }).join('');
+        var baselineCount = shared.length + excluded;
+        var matchedCoverage = baselineCount ? shared.length / baselineCount * 100 : null;
+        document.getElementById('comparison-tiles').innerHTML += '<div class="stat"><div class="label">Total Assessed DOIs</div>'
+            + '<div class="value">' + shared.length + '</div><div class="sub">Assessed in both periods<br>'
+            + (matchedCoverage == null ? '' : matchedCoverage.toFixed(0) + '% of August assessed DOIs')
+            + '</div></div>';
+        var platforms = {};
+        shared.forEach(function(doi) {
+            var platform = base[doi].p || 'Other';
+            if (!platforms[platform]) platforms[platform] = [];
+            platforms[platform].push(doi);
+        });
+        var currentPlatforms = {};
+        records.forEach(function(record) {
+            var platform = record.platform || 'Other';
+            if (!currentPlatforms[platform]) currentPlatforms[platform] = 0;
+            if (record.fair != null) currentPlatforms[platform]++;
+        });
+        var platformOrder = Object.keys(currentPlatforms).sort(function(a, b) {
+            return currentPlatforms[b] - currentPlatforms[a];
+        });
+        document.getElementById('comparison-platforms').innerHTML = [null].concat(platformOrder).map(function(platform) {
+            var stats = summary(platform === null ? shared : (platforms[platform] || []), 's');
+            var title = platform === null ? 'Total F-UJI FAIR Score' : platformName(platform);
+            return '<div class="stat"><div class="label">' + escapeHtml(title)
+                + '</div><div class="value">' + (stats ? stats.after.toFixed(0) + '%' : '&mdash;') + '</div><div class="sub tile-meta">'
+                + (stats ? '<div>August: ' + stats.before.toFixed(0) + '%</div>'
+                    + '<div>' + change(stats) + 'percentage points</div>'
+                    + '<div>Matched DOIs: ' + stats.n + '</div>' : '<div>No August baseline</div><div>Excluded from comparison</div>')
+                + '</div></div>';
+        }).join('');
+        var improved = 0, declined = 0;
+        shared.forEach(function(doi) {
+            if (fairScores[doi].s > base[doi].s) improved++;
+            if (fairScores[doi].s < base[doi].s) declined++;
+        });
+        var currentPeriod = assessmentPeriodLabel();
+        document.getElementById('comparison-outcomes').textContent = shared.length
+            ? 'Of the ' + shared.length + ' datasets assessed in both August 2026 and ' + currentPeriod + ', '
+                + improved + ' improved, ' + declined + ' declined and ' + (shared.length - improved - declined) + ' were unchanged.'
+                + (excluded ? ' ' + excluded + ' August DOIs have no current score and are excluded.' : '')
+            : '';
+    }
+
+    var shortLabels = {
+            'FsF-F1-01MD': 'Unique identifiers', 'FsF-F1-02MD': 'Persistent identifiers',
+            'FsF-F2-01M': 'Descriptive metadata', 'FsF-F3-01M': 'Data identifier in metadata', 'FsF-F4-01M': 'Search indexing',
+            'FsF-A1-01M': 'Access conditions', 'FsF-A1-02MD': 'Retrieval by identifier',
+            'FsF-A1.1-01MD': 'Standard access protocol', 'FsF-A1.2-01MD': 'Authentication-capable protocol',
+            'FsF-I1-01M': 'Structured metadata', 'FsF-I2-01M': 'Registered vocabularies', 'FsF-I3-01M': 'Qualified links',
+            'FsF-R1-01M': 'Description of data content', 'FsF-R1.1-01M': 'Licence information',
+            'FsF-R1.2-01M': 'Provenance', 'FsF-R1.3-01M': 'Community metadata standard', 'FsF-R1.3-02D': 'Community file format'
+        };
+
+    function renderMaturity() {
+        var selected = document.getElementById('maturity-platform').value || '';
+        var cohort = records.filter(function(record) { return record.fair != null && (!selected || (record.platform || 'Other') === selected); });
+        document.getElementById('maturity-cohort').textContent = cohort.length + ' assessed dataset DOIs · '
+            + (selected ? platformName(selected) : 'All platforms') + ' · ' + assessmentPeriodLabel() + ' · Metric set ' + (fairMetadata.metric_version || 'unavailable');
+        var principles = [
+            ['F', 'Findable', 'Data and metadata should have persistent identifiers, rich descriptions, explicit links to the data identifier, and registration or indexing in a searchable resource.'],
+            ['A', 'Accessible', 'Data and metadata should be retrievable through standard, open protocols, support authentication when needed, and preserve metadata even when data are no longer available.'],
+            ['I', 'Interoperable', 'Data and metadata should use shared formal languages, FAIR vocabularies and qualified references to related resources.'],
+            ['R', 'Reusable', 'Data and metadata should provide rich descriptions, clear usage licences, provenance and relevant community standards.']
+        ];
+        var levelNames = ['Incomplete', 'Initial', 'Moderate', 'Advanced', 'Unavailable'];
+        var container = document.getElementById('maturity-principles');
+        container.innerHTML = '<div class="maturity-axis" aria-hidden="true"><span>Share of assessed datasets</span><div><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div></div>' + principles.map(function(principle) {
+            var metricIds = Object.keys(fairMetadata.metric_names || {}).filter(function(id) { return id.indexOf('FsF-' + principle[0]) === 0; });
+            var metrics = metricIds.map(function(id) {
+                var counts = [0, 0, 0, 0, 0];
+                cohort.forEach(function(record) {
+                    var check = (record.fairChecks || []).find(function(item) { return item[0] === id; });
+                    var level = check ? check[4] : null;
+                    counts[Number.isInteger(level) && level >= 0 && level <= 3 ? level : 4]++;
+                });
+                var descriptions = counts.map(function(count, level) {
+                    return levelNames[level] + ': ' + count + ' (' + (cohort.length ? Math.round(count / cohort.length * 100) : 0) + '%)';
+                });
+                var segments = counts.map(function(count, level) {
+                    if (!count || !cohort.length) return '';
+                    var percentage = count / cohort.length * 100;
+                    return '<span class="maturity-segment maturity-' + level + '" style="width:' + percentage + '%" title="'
+                        + escapeAttr(descriptions[level]) + '" aria-hidden="true">' + (percentage >= 12 ? Math.round(percentage) + '%' : '') + '</span>';
+                }).join('');
+                return '<div class="maturity-chart-row"><div class="maturity-row-label">' + escapeHtml(shortLabels[id] || id) + '</div>'
+                    + (cohort.length ? '<div class="maturity-bar" role="img" aria-label="' + escapeAttr((shortLabels[id] || id) + ': ' + descriptions.join('; ')) + '">' + segments + '</div>' : '<p>No assessed datasets</p>')
+                    + '<details class="maturity-row-detail"><summary>Test details and counts</summary><p><strong>' + escapeHtml(id) + '</strong> — '
+                    + escapeHtml(fairMetadata.metric_names[id]) + '</p><p>' + descriptions.join(' · ') + '</p>'
+                    + '<a href="https://doi.org/10.5281/zenodo.15045911" target="_blank" rel="noopener">Metric specification v0.8</a></details></div>';
+            }).join('');
+            return '<section class="maturity-chart-group" aria-label="' + principle[1] + '"><h3>'
+                + principle[1] + ' (' + principle[0] + ')</h3>'
+                + (metrics || '<p>No metric definitions available.</p>') + '</section>';
+        }).join('');
+    }
+
+    function assessmentPeriodLabel() {
+        var subtitle = document.getElementById('assessment-subtitle').textContent;
+        return subtitle || 'the current assessment';
+    }
+
+    function escapeHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function(c) {
+            return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+        });
+    }
+
+    function escapeAttr(s) {
+        return escapeHtml(s);
+    }
+
+}());
+</script>
+</body>
+</html>
