@@ -1,5 +1,5 @@
 {
- "harvested": "2026-11-14T10:45:56.637Z",
+ "harvested": "2026-11-16T12:37:02.316Z",
  "sources": {
   "10.58024/agumaec47aff": {
    "platform": "EarthBank",
@@ -1113,26 +1113,6 @@
   "10.25914/f01x-b211": {
    "platform": "NCI",
    "name": "Magnetotelluric Broadband Surveys of Australia",
-   "citing": []
-  },
-  "10.25914/c7cn-cc79": {
-   "platform": "NCI",
-   "name": "Magnetotelluric Broadband Surveys of New South Wales",
-   "citing": []
-  },
-  "10.25914/rgpm-7528": {
-   "platform": "NCI",
-   "name": "Magnetotelluric Broadband Surveys of South Australia",
-   "citing": []
-  },
-  "10.25914/31br-q319": {
-   "platform": "NCI",
-   "name": "Magnetotelluric Broadband Surveys of Tasmania",
-   "citing": []
-  },
-  "10.25914/msrb-9j13": {
-   "platform": "NCI",
-   "name": "Magnetotelluric Broadband Surveys of Victoria",
    "citing": []
   },
   "10.25914/5eaa30cc934d0": {
