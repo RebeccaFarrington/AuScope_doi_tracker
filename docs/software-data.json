@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-16T12:46:37.631Z",
+  "generated": "2026-11-17T11:31:24.075Z",
   "records": [
     {
       "name": "GPlates",
@@ -13,7 +13,7 @@
       "status": "active",
       "note": "",
       "publications": 264,
-      "citations": 8006,
+      "citations": 8036,
       "earliestYear": 2012,
       "latestYear": 2026,
       "records": [
@@ -1443,7 +1443,7 @@
           "authors": "Guido M Gianni; Jeremías Likerman; César R Navarrete; Conrado R Gianni; Sergio Zlotnik",
           "year": 2023,
           "journal": "Nature Communications",
-          "cited": 19,
+          "cited": 22,
           "oa": true,
           "evidence": "text-software"
         },
@@ -2333,7 +2333,7 @@
           "authors": "R. Dietmar Müller; John Cannon; Xiaodong Qin; Robin J. Watson; Michael Gurnis; Simon E. Williams; Tobias Pfaffelmoser; Maria Seton; Samuel H. J. Russell; Sabin Zahirovic",
           "year": 2018,
           "journal": "Geochemistry Geophysics Geosystems",
-          "cited": 799,
+          "cited": 824,
           "oa": true,
           "evidence": "text-attributed"
         },
@@ -2563,7 +2563,7 @@
           "authors": "R Dietmar Müller; Xiaodong Qin; David T Sandwell; Adriana Dutkiewicz; Simon E Williams; Nicolas Flament; Stefan Maus; Maria Seton",
           "year": 2016,
           "journal": "PLoS ONE",
-          "cited": 77,
+          "cited": 79,
           "oa": true,
           "evidence": "text-attributed"
         },
@@ -2669,7 +2669,7 @@
       "status": "active",
       "note": "",
       "publications": 51,
-      "citations": 402,
+      "citations": 421,
       "earliestYear": 2020,
       "latestYear": 2026,
       "records": [
@@ -2689,7 +2689,7 @@
           "authors": "Jing Li; Keqing Li; Jiangtao Li; Hongzhan Fei; Jiashun Hu",
           "year": 2026,
           "journal": "Nature Communications",
-          "cited": 0,
+          "cited": 1,
           "oa": true,
           "evidence": "text-software"
         },
@@ -2699,7 +2699,7 @@
           "authors": "Xiaohan Song; Simon L Klemperer",
           "year": 2026,
           "journal": "Scientific Reports",
-          "cited": 4,
+          "cited": 5,
           "oa": true,
           "evidence": "text-software"
         },
@@ -2749,7 +2749,7 @@
           "authors": "Fabio A Capitanio; Thyagarajulu Gollapalli; Radhakrishna Munukutla; Juan Carlos Graciosa; Zuhair Mohd; Adam Beall; Luca Dal Zilio",
           "year": 2025,
           "journal": "Nature Communications",
-          "cited": 2,
+          "cited": 5,
           "oa": true,
           "evidence": "text-attributed"
         },
@@ -2789,7 +2789,7 @@
           "authors": "Guido M. Gianni; Leandro C. Gallo; Jeremías Likerman; Andrés Echaurren; Conrado R. Gianni; Claudio Faccenna",
           "year": 2025,
           "journal": "Science Advances",
-          "cited": 5,
+          "cited": 6,
           "oa": true,
           "evidence": "text-software"
         },
@@ -2839,7 +2839,7 @@
           "authors": "Prasanna Mahesh Gunawardana; Priyadarshi Chowdhury; Gabriele Morra; Peter A. Cawood",
           "year": 2024,
           "journal": "Geology",
-          "cited": 24,
+          "cited": 25,
           "oa": true,
           "evidence": "text-software"
         },
@@ -2909,7 +2909,7 @@
           "authors": "‪Hrvoje Tkalčić; Anatoly B. Belonoshko; Jack B. Muir; Maurizio Mattesini; Louis N. Moresi; Lauren Waszek",
           "year": 2024,
           "journal": "Scientific Reports",
-          "cited": 13,
+          "cited": 15,
           "oa": true,
           "evidence": "text-software"
         },
@@ -2949,7 +2949,7 @@
           "authors": "Keqing Li; Jiashun Hu; Yida Li; Hao Zhou; Haijiang Zhang",
           "year": 2024,
           "journal": "Geophysical Research Letters",
-          "cited": 8,
+          "cited": 11,
           "oa": true,
           "evidence": "text-software"
         },
@@ -3009,7 +3009,7 @@
           "authors": "Guido M Gianni; Jeremías Likerman; César R Navarrete; Conrado R Gianni; Sergio Zlotnik",
           "year": 2023,
           "journal": "Nature Communications",
-          "cited": 19,
+          "cited": 22,
           "oa": true,
           "evidence": "text-software"
         },
@@ -3109,7 +3109,7 @@
           "authors": "Zhensheng Wang; Fabio A Capitanio; Zaicong Wang; Timothy M Kusky",
           "year": 2022,
           "journal": "Proceedings of the National Academy of Sciences",
-          "cited": 24,
+          "cited": 26,
           "oa": true,
           "evidence": "text-software"
         },
@@ -3139,7 +3139,7 @@
           "authors": "Fabio A. Capitanio; Oliver Nebel; Jean‐François Moyen; Peter A. Cawood",
           "year": 2022,
           "journal": "Journal of Geophysical Research Solid Earth",
-          "cited": 10,
+          "cited": 12,
           "oa": true,
           "evidence": "text-software"
         },
@@ -3195,14 +3195,14 @@
       "status": "active",
       "note": "",
       "publications": 11,
-      "citations": 64,
+      "citations": 67,
       "earliestYear": 2022,
       "latestYear": 2026,
       "records": [
         {
           "doi": "10.5194/egusphere-egu26-19074",
           "title": "Assimilating Intra-Plate Lava Geochemistry into Adjoint Reconstructions of Earth’s Mantle Evolution",
-          "authors": "Rhodri Davies; Sia Ghelichkhan",
+          "authors": "D. Rhodri Davies; Sia Ghelichkhan",
           "year": 2026,
           "journal": "EGU General Assembly Conference Abstracts",
           "cited": 0,
@@ -3232,7 +3232,7 @@
         {
           "doi": "10.5194/egusphere-egu26-17242",
           "title": "Multi-material forward and inverse modelling in G-ADOPT via the conservative level-set approach",
-          "authors": "Thomas Duvernay; Rhodri Davies; Sia Ghelichkhan; Fanny Garel; William I. Scott; Stephan C. Kramer; Dale Roberts; Angus H. Gibson",
+          "authors": "Thomas Duvernay; D. Rhodri Davies; Sia Ghelichkhan; Fanny Garel; William I. Scott; Stephan C. Kramer; Dale Roberts; Angus H. Gibson",
           "year": 2026,
           "journal": "EGU General Assembly Conference Abstracts",
           "cited": 0,
@@ -3275,7 +3275,7 @@
           "authors": "Siavash Ghelichkhan; Angus H. Gibson; D. Rhodri Davies; Stephan C. Kramer; David A. Ham",
           "year": 2024,
           "journal": "Geoscientific model development",
-          "cited": 17,
+          "cited": 20,
           "oa": true,
           "evidence": "candidate"
         },
