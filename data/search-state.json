@@ -256,63 +256,87 @@
     },
     {
       "id": "term:Earth Imaging Sounding AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:31.821Z",
+      "results": 12
     },
     {
       "id": "term:Earth Composition Evolution AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:37.331Z",
+      "results": 5
     },
     {
       "id": "term:Characterisation AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:38.974Z",
+      "results": 108
     },
     {
       "id": "term:Autonomous Sensing AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:39.392Z",
+      "results": 0
     },
     {
       "id": "term:Simulation Analysis Modelling AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:41.020Z",
+      "results": 113
     },
     {
       "id": "term:AVRE AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:41.836Z",
+      "results": 11
     },
     {
       "id": "term:Research Data Systems AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:42.623Z",
+      "results": 2
     },
     {
       "id": "term:Earth Sampling AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:43.745Z",
+      "results": 5
     },
     {
       "id": "term:Outreach Engagement AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:44.575Z",
+      "results": 15
     },
     {
       "id": "term:International Collaboration AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:45.492Z",
+      "results": 29
     },
     {
       "id": "term:Antarctica GRIT AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:46.003Z",
+      "results": 3
     },
     {
       "id": "term:esys-escript",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-17T12:10:47.021Z",
+      "results": 19
     },
     {
       "id": "term:escript finley",
@@ -320,5 +344,5 @@
       "attempts": 0
     }
   ],
-  "updated": "2026-11-17T02:32:51.020Z"
+  "updated": "2026-11-17T12:10:47.071Z"
 }
