@@ -1,351 +1,276 @@
 {
-  "cycle": "2026-W47",
-  "started": "2026-11-16T08:08:06.987Z",
+  "cycle": "2026-W48",
+  "started": "2026-11-23T03:51:27.712Z",
   "units": [
     {
       "id": "oa:AuScope:fulltext.search:2007",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:07.941Z",
-      "results": 58
+      "done_at": "2026-11-23T03:51:28.737Z",
+      "results": 73
     },
     {
       "id": "oa:AuScope:default.search:2007",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:08.426Z",
-      "results": 58
+      "done_at": "2026-11-23T03:51:29.531Z",
+      "results": 73
     },
     {
       "id": "oa:AuScope:fulltext.search:2012",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:09.711Z",
-      "results": 130
+      "done_at": "2026-11-23T03:51:30.995Z",
+      "results": 134
     },
     {
       "id": "oa:AuScope:default.search:2012",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:10.788Z",
-      "results": 130
+      "done_at": "2026-11-23T03:51:32.138Z",
+      "results": 134
     },
     {
       "id": "oa:AuScope:fulltext.search:2017",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:12.716Z",
-      "results": 287
+      "done_at": "2026-11-23T03:51:35.158Z",
+      "results": 352
     },
     {
       "id": "oa:AuScope:default.search:2017",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:14.744Z",
-      "results": 287
+      "done_at": "2026-11-23T03:51:38.141Z",
+      "results": 352
     },
     {
       "id": "oa:AuScope:fulltext.search:2022",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:17.517Z",
-      "results": 368
+      "done_at": "2026-11-23T03:51:41.611Z",
+      "results": 391
     },
     {
       "id": "oa:AuScope:default.search:2022",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:20.317Z",
-      "results": 368
+      "done_at": "2026-11-23T03:51:44.818Z",
+      "results": 391
     },
     {
       "id": "others:AuScope",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:08:59.205Z",
-      "results": 192
+      "done_at": "2026-11-23T03:52:25.173Z",
+      "results": 148
     },
     {
       "id": "term:Hylogger CSIRO",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:09:17.151Z",
-      "results": 85
+      "done_at": "2026-11-23T03:52:27.347Z",
+      "results": 88
     },
     {
       "id": "term:SHRIMP II Curtin",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:09:18.839Z",
+      "done_at": "2026-11-23T03:52:29.486Z",
       "results": 104
     },
     {
       "id": "term:Western Australia Argon Isotope Facility",
       "status": "done",
       "attempts": 1,
-      "done_at": "2026-11-16T08:09:20.242Z",
-      "results": 51
+      "done_at": "2026-11-23T03:52:31.384Z",
+      "results": 56
     },
     {
       "id": "term:Noble Gas Geochronology Laboratory",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:16.826Z",
-      "results": 5
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Geoscience Atom Probe",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:22.586Z",
-      "results": 45
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:National Argon Map",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:23.604Z",
-      "results": 4
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AuScope VLBI",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:27.889Z",
-      "results": 68
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Yarragadee VLBI",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:33.768Z",
-      "results": 105
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Katherine VLBI",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:36.093Z",
-      "results": 1
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Mt Pleasant VLBI",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:40.135Z",
-      "results": 32
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AusPass seismic",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:46.294Z",
-      "results": 48
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AusLAMP",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:48.371Z",
-      "results": 108
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Australian Seismometers in Schools",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:51.030Z",
-      "results": 41
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Australian Geophysical Observing System",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:43:54.308Z",
-      "results": 97
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:EarthByte",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-16T18:44:02.699Z",
-      "results": 151
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:GPlates",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:22.914Z",
-      "results": 296
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Underworld2",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:24.107Z",
-      "results": 108
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:G-Adopt geodynamic",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:30.977Z",
-      "results": 19
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AusGeochem",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:32.016Z",
-      "results": 64
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:National Virtual Core Library",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:33.187Z",
-      "results": 58
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AuScope Discovery Portal",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:39.539Z",
-      "results": 21
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AuScope Virtual Research Environment",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:46.834Z",
-      "results": 11
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AuScope Virtual Geophysical Laboratory",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:47.562Z",
-      "results": 0
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AuScope Geochemistry Network",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:48.884Z",
-      "results": 26
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Australian Scalable Drone Cloud",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:49.514Z",
-      "results": 5
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Geophysics2030",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:49.976Z",
-      "results": 2
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Geospatial Geodesy AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T02:32:50.978Z",
-      "results": 38
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Earth Imaging Sounding AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:31.821Z",
-      "results": 12
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Earth Composition Evolution AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:37.331Z",
-      "results": 5
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Characterisation AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:38.974Z",
-      "results": 108
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Autonomous Sensing AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:39.392Z",
-      "results": 0
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Simulation Analysis Modelling AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:41.020Z",
-      "results": 113
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:AVRE AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:41.836Z",
-      "results": 11
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Research Data Systems AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:42.623Z",
-      "results": 2
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Earth Sampling AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:43.745Z",
-      "results": 5
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Outreach Engagement AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:44.575Z",
-      "results": 15
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:International Collaboration AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:45.492Z",
-      "results": 29
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:Antarctica GRIT AuScope",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:46.003Z",
-      "results": 3
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:esys-escript",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T12:10:47.021Z",
-      "results": 19
+      "status": "pending",
+      "attempts": 0
     },
     {
       "id": "term:escript finley",
-      "status": "done",
-      "attempts": 1,
-      "done_at": "2026-11-17T21:08:48.021Z",
-      "results": 27
+      "status": "pending",
+      "attempts": 0
     }
   ],
-  "updated": "2026-11-17T21:08:48.053Z",
-  "completed": "2026-11-17T21:08:48.053Z"
+  "updated": "2026-11-23T03:52:31.429Z"
 }
