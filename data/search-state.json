@@ -172,63 +172,87 @@
     },
     {
       "id": "term:GPlates",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:26:52.637Z",
+      "results": 298
     },
     {
       "id": "term:Underworld2",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:26:54.443Z",
+      "results": 108
     },
     {
       "id": "term:G-Adopt geodynamic",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:26:55.415Z",
+      "results": 24
     },
     {
       "id": "term:AusGeochem",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:27:13.419Z",
+      "results": 67
     },
     {
       "id": "term:National Virtual Core Library",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:27:32.107Z",
+      "results": 62
     },
     {
       "id": "term:AuScope Discovery Portal",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:27:34.640Z",
+      "results": 23
     },
     {
       "id": "term:AuScope Virtual Research Environment",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:27:38.112Z",
+      "results": 11
     },
     {
       "id": "term:AuScope Virtual Geophysical Laboratory",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:27:42.403Z",
+      "results": 0
     },
     {
       "id": "term:AuScope Geochemistry Network",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:27:50.854Z",
+      "results": 27
     },
     {
       "id": "term:Australian Scalable Drone Cloud",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:28:01.501Z",
+      "results": 5
     },
     {
       "id": "term:Geophysics2030",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:28:14.683Z",
+      "results": 2
     },
     {
       "id": "term:Geospatial Geodesy AuScope",
-      "status": "pending",
-      "attempts": 0
+      "status": "done",
+      "attempts": 1,
+      "done_at": "2026-11-24T02:28:29.340Z",
+      "results": 39
     },
     {
       "id": "term:Earth Imaging Sounding AuScope",
@@ -296,5 +320,5 @@
       "attempts": 0
     }
   ],
-  "updated": "2026-11-23T15:06:04.649Z"
+  "updated": "2026-11-24T02:28:29.409Z"
 }
