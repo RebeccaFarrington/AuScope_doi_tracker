@@ -1,45 +1,42 @@
 {
-  "generated": "2026-11-24T13:35:36.342Z",
+  "generated": "2026-11-24T23:53:38.249Z",
   "pillars": {
     "publications": {
-      "total": 3316,
-      "citations": 76935,
+      "total": 3231,
+      "citations": 76415,
       "verified": 46,
       "candidate": 124,
       "attributed": {
-        "pubs": 780,
-        "citations": 22648
+        "pubs": 779,
+        "citations": 22650
       },
       "software": {
-        "pubs": 305,
+        "pubs": 306,
         "citations": 7292
       },
       "unverified": {
-        "pubs": 2231,
-        "citations": 46995
+        "pubs": 2146,
+        "citations": 46473
       }
     },
     "datasets": {
-      "total": 325,
+      "total": 183,
       "byPlatform": {
         "EarthBank": 64,
         "AuScope Data Repository": 6,
         "AusPass": 87,
-        "NCI MT": 141,
-        "NCI DAS": 4,
+        "NCI DAS": 3,
         "NCI MATE": 15,
         "NVCL": 8
       },
       "collections": {
-        "NCI MT": 100,
-        "NCI DAS": 3,
+        "NCI DAS": 2,
         "NVCL": 1
       },
       "fairAvg": {
         "EarthBank": 48,
         "AuScope Data Repository": 52,
         "AusPass": 52,
-        "NCI MT": 42,
         "NCI DAS": 42,
         "NCI MATE": 42,
         "NVCL": 42
@@ -110,7 +107,7 @@
     "ausis": {
       "stations": 54,
       "active": 51,
-      "streaming": 50,
+      "streaming": 51,
       "networkDoi": "10.7914/SN/S1",
       "since": 2011
     },
